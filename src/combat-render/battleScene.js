@@ -30,7 +30,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
     function frame(now){
       const elapsed=now-started,dt=Math.min(40,now-last);last=now;updateCamera(camera,dt);updateParticles(particles,dt);
       const clip=activeClipAt(timeline,elapsed),p=clip?clipProgress(clip,elapsed):1,event=clip?.event;
-      let left=basePose(after.left,leftBase.x,leftBase.y,1),right=basePose(after.right,rightBase.x,rightBase.y,-1),impact=null,trailProgress=0,title='',afterimages=[],dust=[];
+      let left=basePose(after.left,leftBase.x,leftBase.y,1),right=basePose(after.right,rightBase.x,rightBase.y,-1),impact=null,damagePopup=null,trailProgress=0,title='',afterimages=[],dust=[];
       left.weapon=left.id===attackerId?weaponFor(martialId):null;right.weapon=right.id===attackerId?weaponFor(martialId):null;
       const attacker=left.id===attackerId?left:right,target=left.id===targetId?left:right,dir=attacker.side;
       if(event){
@@ -46,6 +46,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
           const drive=travel+26*Math.sin(Math.PI*p);attacker.x+=dir*drive;attacker.y-=12*Math.sin(Math.PI*p);attacker.lean=dir*(fx.motion==='charge-palm'?.2:.18);target.flash=Math.max(0,1-p*.9);trailProgress=.6+p*.4;
           afterimages=afterimageSet(attacker,dir,.82);dust=dustSet(attacker.x,attacker.y,dir,1.45);
           impact={martialId,x:target.x-dir*28,y:target.y-43,groundY:target.y+58,ageMs:p*260};
+          damagePopup={x:target.x,y:target.y-122,damage:event.damage||0,progress:p,tone:target.id==='player'?'taken':'dealt'};
           if(!triggered.has(clip.id)){
             triggered.add(clip.id);
             const heavy=fx.impact==='shockwave'||fx.impact==='heavy-spark';
@@ -67,7 +68,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
       const hitClip=timeline.clips.find(x=>x.event.type==='hit'),hitStarted=Boolean(hitClip&&elapsed>=hitClip.startMs);
       const leftHp=left.id===targetId&&hitStarted?after.left.hp:before.left.hp;
       const rightHp=right.id===targetId&&hitStarted?after.right.hp:before.right.hp;
-      renderer.render({camera,left,right,leftHp,rightHp,leftMaxHp:after.left.maxHp,rightMaxHp:after.right.maxHp,particles,martialId,attackerId,trailProgress,impact,title,afterimages,dust});
+      renderer.render({camera,left,right,leftHp,rightHp,leftMaxHp:after.left.maxHp,rightMaxHp:after.right.maxHp,particles,martialId,attackerId,trailProgress,impact,damagePopup,title,afterimages,dust});
       const freezeEvent=freezeAt?.eventType,freezeProgress=freezeAt?.progress??.6;
       if(freezeEvent&&event?.type===freezeEvent&&p>=freezeProgress){resolve({frozen:true,eventType:event.type,progress:p});return;}
       if(elapsed<timeline.totalMs+100)requestAnimationFrame(frame);else resolve({frozen:false});
