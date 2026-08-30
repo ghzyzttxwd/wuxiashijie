@@ -7,10 +7,12 @@ import {ensureSession,syncSessionWorld,travelSession,trainMartialSession} from '
 import {learnAtLuoyangHall} from '../martial/venues/luoyangHall.js';
 import {loadSession,saveSession} from '../save/saveManager.js';
 import {renderMartialPanel} from './martialPanel.js';
+import {mountCombatPrototype} from './combatPrototype.js';
 
 const OTHER_COUNTRIES=['大唐','大宋','大清','大理','辽','西夏','蒙古','神州','西域诸国','海外'];
 const state={slot:0,session:null,view:'world',focusLocationId:null,returnView:'country',martialMessage:''};
 const $=q=>document.querySelector(q),character=()=>state.session.character;
+
 function currentLocation(){return MING_LOCATION_BY_ID[character()?.world?.location]||null;}
 function formatTime(){const w=character().world;return `第 ${w.day} 日 · ${String(w.hour).padStart(2,'0')}:00`;}
 function routeText(location){if(location.id===character().world.location)return'当前所在';const route=findShortestRoute(character().world.location,location.id);return route?`约 ${route.hours} 小时`:'道路未通';}
@@ -18,12 +20,63 @@ function persist(){saveSession(state.slot,state.session);}
 function sceneName(location,sceneId){return location.scenes.find(x=>x.id===sceneId)?.name||sceneId;}
 function errorText(error){const map={not_at_luoyang_hall:'你不在洛阳武馆街。',martial_not_taught_here:'这里不传这门武功。',already_learned:'这门武功你已经会了。',not_enough_silver:'银两不够。',martial_not_learned:'尚未学会这门武功。'};return map[error?.message]||`无法执行：${error?.message||'未知原因'}`;}
 
-function renderShell(){const root=$('#world-root');root.hidden=false;$('#creation-root').hidden=true;root.innerHTML=`<section class="world-top panel"><div><p class="eyebrow">九州武侠 · M4</p><h1 id="world-character-name"></h1><p id="world-character-meta"></p></div><div class="world-status"><b id="world-location"></b><span id="world-time"></span><span id="world-silver"></span></div></section><nav class="world-nav panel"><button data-world-home>天下列国</button><button data-country="ming">大明</button><button data-martial>武学</button><button data-return-create>返回角色页</button></nav><section id="world-content" class="panel world-content"></section>`;root.querySelector('#world-character-name').textContent=character().name;root.querySelector('#world-character-meta').textContent='江湖初行 · 大明';root.querySelector('[data-world-home]').onclick=()=>{state.view='world';state.focusLocationId=null;renderContent();};root.querySelector('[data-country]').onclick=()=>{state.view='country';state.focusLocationId=null;renderContent();};root.querySelector('[data-martial]').onclick=()=>{state.returnView=state.view==='martial'?'country':state.view;state.view='martial';state.martialMessage='';renderContent();};root.querySelector('[data-return-create]').onclick=()=>{root.hidden=true;$('#creation-root').hidden=false;};renderContent();}
+function renderShell(){
+  const root=$('#world-root');root.hidden=false;$('#creation-root').hidden=true;
+  root.innerHTML=`<section class="world-top panel"><div><p class="eyebrow">九州武侠 · M5</p><h1 id="world-character-name"></h1><p id="world-character-meta"></p></div><div class="world-status"><b id="world-location"></b><span id="world-time"></span><span id="world-silver"></span></div></section><nav class="world-nav panel"><button data-world-home>天下列国</button><button data-country="ming">大明</button><button data-martial>武学</button><button data-return-create>返回角色页</button></nav><section id="world-content" class="panel world-content"></section>`;
+  root.querySelector('#world-character-name').textContent=character().name;
+  root.querySelector('#world-character-meta').textContent='江湖初行 · 大明';
+  root.querySelector('[data-world-home]').onclick=()=>{state.view='world';state.focusLocationId=null;renderContent();};
+  root.querySelector('[data-country]').onclick=()=>{state.view='country';state.focusLocationId=null;renderContent();};
+  root.querySelector('[data-martial]').onclick=()=>{state.returnView=state.view==='martial'?'country':state.view;state.view='martial';state.martialMessage='';renderContent();};
+  root.querySelector('[data-return-create]').onclick=()=>{root.hidden=true;$('#creation-root').hidden=false;};
+  renderContent();
+}
+
 function renderHeader(){const loc=currentLocation();$('#world-location').textContent=loc?`当前位置：${loc.name}`:'当前位置：未知';$('#world-time').textContent=formatTime();$('#world-silver').textContent=`银两：${character().wallet?.silver??0}`;}
-function renderWorld(){const content=$('#world-content');content.innerHTML=`<div class="section-head"><div><p class="eyebrow">天下列国图</p><h2>天下</h2><p>各国同时存在于这个架空融合时代。V0.1 先把大明做活，其余国域暂不开放。</p></div></div><div class="country-grid"><button class="country-card active-country" data-open-ming><b>大明</b><span>已开放 · 当前首发国域</span></button>${OTHER_COUNTRIES.map(name=>`<button class="country-card" disabled><b>${name}</b><span>后续开放</span></button>`).join('')}</div>`;content.querySelector('[data-open-ming]').onclick=()=>{state.view='country';renderContent();};}
-function renderCountry(){const content=$('#world-content');content.innerHTML=`<div class="section-head"><div><p class="eyebrow">国域</p><h2>${MING_COUNTRY.name}</h2><p>${MING_COUNTRY.description}</p></div></div><div class="location-grid">${MING_LOCATIONS.map(loc=>`<button class="location-card ${loc.id===character().world.location?'current':''}" data-location="${loc.id}"><span class="risk">风险 ${loc.risk}</span><b>${loc.name}</b><small>${loc.summary}</small><em>${routeText(loc)}</em></button>`).join('')}</div>`;content.querySelectorAll('[data-location]').forEach(button=>button.onclick=()=>{state.focusLocationId=button.dataset.location;state.view='location';renderContent();});}
-function npcBlock(location){const states=npcsAtLocation(state.session.worldState.npc,location.id);if(!states.length)return'<div class="npc-section"><h3>此刻人物</h3><p>此刻没有核心人物在此活动。</p></div>';return`<div class="npc-section"><h3>此刻人物</h3><div class="npc-grid">${states.map(npcState=>{const def=MING_CORE_NPC_BY_ID[npcState.id];return`<article class="npc-card"><b>${def?.name||npcState.id}</b><span>${def?.role||''}</span><small>${sceneName(location,npcState.sceneId)} · ${npcState.activity}</small><em>${npcState.alive?'在世':'已故'}</em></article>`;}).join('')}</div></div>`;}
-function renderLocation(){const location=MING_LOCATION_BY_ID[state.focusLocationId];if(!location){state.view='country';renderContent();return;}const here=location.id===character().world.location,route=here?{hours:0,locations:[location.id]}:findShortestRoute(character().world.location,location.id);const content=$('#world-content');content.innerHTML=`<div class="section-head"><div><p class="eyebrow">${location.kind}</p><h2>${location.name}</h2><p>${location.summary}</p></div><button data-back-country>返回大明地图</button></div>${here?`<p class="arrival">你当前就在这里。</p>`:`<div class="travel-box"><b>行程：${route?route.locations.map(id=>MING_LOCATION_BY_ID[id]?.name||id).join(' → '):'道路未通'}</b><span>${route?`预计 ${route.hours} 小时`:'暂不可达'}</span><button data-travel ${route?'':'disabled'}>启程前往</button></div>`}<div class="scene-grid">${here?location.scenes.map(scene=>`<button data-scene="${scene.id}" class="${character().world.scene===scene.id?'selected-scene':''}"><b>${scene.name}</b><span>进入场景</span></button>`).join(''):'<p>抵达后才能进入具体场景。</p>'}</div>${here?npcBlock(location):''}`;content.querySelector('[data-back-country]').onclick=()=>{state.view='country';renderContent();};const travel=content.querySelector('[data-travel]');if(travel)travel.onclick=()=>{state.session=travelSession(state.session,location.id);persist();renderContent();};content.querySelectorAll('[data-scene]').forEach(button=>button.onclick=()=>{state.session={...state.session,character:{...character(),world:{...character().world,scene:button.dataset.scene}}};persist();renderContent();});}
-function renderMartial(){const content=$('#world-content');renderMartialPanel(content,state.session,{message:state.martialMessage,onBack:()=>{state.view=state.returnView==='martial'?'country':state.returnView;renderContent();},onLearn:id=>{try{state.session=learnAtLuoyangHall(state.session,id);state.martialMessage='教习传授了基础法门。一个时辰过去，江湖也没有停下。';persist();}catch(error){state.martialMessage=errorText(error);}renderContent();},onTrain:id=>{try{const out=trainMartialSession(state.session,id,2);state.session=out.session;state.martialMessage=`修炼两小时：熟练 +${out.result.masteryGain}，理解 +${out.result.understandingGain}。`;persist();}catch(error){state.martialMessage=errorText(error);}renderContent();}});}
-function renderContent(){renderHeader();if(state.view==='world')renderWorld();else if(state.view==='country')renderCountry();else if(state.view==='martial')renderMartial();else renderLocation();}
+
+function renderWorld(){
+  const content=$('#world-content');
+  content.innerHTML=`<div class="section-head"><div><p class="eyebrow">天下列国图</p><h2>天下</h2><p>各国同时存在于这个架空融合时代。V0.1 先把大明做活，其余国域暂不开放。</p></div></div><div class="country-grid"><button class="country-card active-country" data-open-ming><b>大明</b><span>已开放 · 当前首发国域</span></button>${OTHER_COUNTRIES.map(name=>`<button class="country-card" disabled><b>${name}</b><span>后续开放</span></button>`).join('')}</div>`;
+  content.querySelector('[data-open-ming]').onclick=()=>{state.view='country';renderContent();};
+}
+
+function renderCountry(){
+  const content=$('#world-content');
+  content.innerHTML=`<div class="section-head"><div><p class="eyebrow">国域</p><h2>${MING_COUNTRY.name}</h2><p>${MING_COUNTRY.description}</p></div></div><div class="location-grid">${MING_LOCATIONS.map(loc=>`<button class="location-card ${loc.id===character().world.location?'current':''}" data-location="${loc.id}"><span class="risk">风险 ${loc.risk}</span><b>${loc.name}</b><small>${loc.summary}</small><em>${routeText(loc)}</em></button>`).join('')}</div>`;
+  content.querySelectorAll('[data-location]').forEach(button=>button.onclick=()=>{state.focusLocationId=button.dataset.location;state.view='location';renderContent();});
+}
+
+function npcBlock(location){
+  const states=npcsAtLocation(state.session.worldState.npc,location.id);
+  if(!states.length)return'<div class="npc-section"><h3>此刻人物</h3><p>此刻没有核心人物在此活动。</p></div>';
+  return`<div class="npc-section"><h3>此刻人物</h3><div class="npc-grid">${states.map(npcState=>{const def=MING_CORE_NPC_BY_ID[npcState.id];return`<article class="npc-card"><b>${def?.name||npcState.id}</b><span>${def?.role||''}</span><small>${sceneName(location,npcState.sceneId)} · ${npcState.activity}</small><em>${npcState.alive?'在世':'已故'}</em></article>`;}).join('')}</div></div>`;
+}
+
+function sparringBlock(){
+  if(character().world.location!=='ming_luoyang'||character().world.scene!=='luoyang_martial_hall')return'';
+  return'<div class="travel-box"><b>武馆演武场</b><span>用你真正学会的基础武功与教习切磋。战斗使用Canvas动态表现。</span><button data-open-combat>切磋试招</button></div>';
+}
+
+function renderLocation(){
+  const location=MING_LOCATION_BY_ID[state.focusLocationId];if(!location){state.view='country';renderContent();return;}
+  const here=location.id===character().world.location,route=here?{hours:0,locations:[location.id]}:findShortestRoute(character().world.location,location.id),content=$('#world-content');
+  content.innerHTML=`<div class="section-head"><div><p class="eyebrow">${location.kind}</p><h2>${location.name}</h2><p>${location.summary}</p></div><button data-back-country>返回大明地图</button></div>${here?'<p class="arrival">你当前就在这里。</p>':`<div class="travel-box"><b>行程：${route?route.locations.map(id=>MING_LOCATION_BY_ID[id]?.name||id).join(' → '):'道路未通'}</b><span>${route?`预计 ${route.hours} 小时`:'暂不可达'}</span><button data-travel ${route?'':'disabled'}>启程前往</button></div>`}<div class="scene-grid">${here?location.scenes.map(scene=>`<button data-scene="${scene.id}" class="${character().world.scene===scene.id?'selected-scene':''}"><b>${scene.name}</b><span>进入场景</span></button>`).join(''):'<p>抵达后才能进入具体场景。</p>'}</div>${here?sparringBlock():''}${here?npcBlock(location):''}`;
+  content.querySelector('[data-back-country]').onclick=()=>{state.view='country';renderContent();};
+  const travel=content.querySelector('[data-travel]');if(travel)travel.onclick=()=>{state.session=travelSession(state.session,location.id);persist();renderContent();};
+  content.querySelectorAll('[data-scene]').forEach(button=>button.onclick=()=>{state.session={...state.session,character:{...character(),world:{...character().world,scene:button.dataset.scene}}};persist();renderContent();});
+  const combat=content.querySelector('[data-open-combat]');if(combat)combat.onclick=()=>{state.view='combat';renderContent();};
+}
+
+function renderMartial(){
+  const content=$('#world-content');
+  renderMartialPanel(content,state.session,{message:state.martialMessage,onBack:()=>{state.view=state.returnView==='martial'?'country':state.returnView;renderContent();},onLearn:id=>{try{state.session=learnAtLuoyangHall(state.session,id);state.martialMessage='教习传授了基础法门。一个时辰过去，江湖也没有停下。';persist();}catch(error){state.martialMessage=errorText(error);}renderContent();},onTrain:id=>{try{const out=trainMartialSession(state.session,id,2);state.session=out.session;state.martialMessage=`修炼两小时：熟练 +${out.result.masteryGain}，理解 +${out.result.understandingGain}。`;persist();}catch(error){state.martialMessage=errorText(error);}renderContent();}});
+}
+
+function renderCombat(){
+  const content=$('#world-content');
+  mountCombatPrototype(content,state.session,{onBack:()=>{state.view='location';renderContent();},onFinish:next=>{state.session=next;persist();state.view='location';renderContent();}});
+}
+
+function renderContent(){renderHeader();if(state.view==='world')renderWorld();else if(state.view==='country')renderCountry();else if(state.view==='martial')renderMartial();else if(state.view==='combat')renderCombat();else renderLocation();}
+
 export function initWorldMap(slot){const loaded=loadSession(slot);if(!loaded)throw Error('empty_slot');state.slot=slot;state.session=syncSessionWorld(ensureSession(loaded));persist();state.view='world';state.focusLocationId=null;state.martialMessage='';renderShell();}
