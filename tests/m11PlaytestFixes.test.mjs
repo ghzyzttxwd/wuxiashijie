@@ -1,10 +1,10 @@
-import test from'node:test';import assert from'node:assert/strict';
+import test from'node:test';import assert from'node:assert/strict';import{readFile}from'node:fs/promises';
 import{createCharacter}from'../src/player/characterFactory.js';
 import{createSession,trainMartialSession,interveneEventSession}from'../src/core/sessionFactory.js';
 import{learnMartial}from'../src/martial/learning.js';
 import{trainMartial}from'../src/martial/training.js';
 import{practiceMartialInCombat}from'../src/martial/combatPractice.js';
-import{jianghuRank,innerStage}from'../src/player/progression.js';
+import{jianghuRank,innerStage,addProgress,applyBattleProgress}from'../src/player/progression.js';
 import{createCombatant}from'../src/combat/combatant.js';import{resolveCombatAction}from'../src/combat/actionResolver.js';
 import{MING_TRAINING_ENCOUNTERS}from'../src/data/encounters/ming.js';import{MING_LOCATION_BY_ID}from'../src/data/locations/ming/index.js';
 import{availableNpcInterventions}from'../src/event/interventions.js';
@@ -16,5 +16,7 @@ test('天生剑骨不是悟性皮肤：剑法修炼倍率真实高于凡骨',()=
 test('天生剑骨会直接强化剑法实战伤害',()=>{const defender=createCombatant({id:'d',name:'d',defense:30,speed:40}),plain=createCombatant({id:'p',name:'p',attack:70,speed:60,talentId:null}),bone=createCombatant({id:'b',name:'b',attack:70,speed:60,talentId:'sword_bone'}),rng=()=>0;const a=resolveCombatAction({attacker:plain,defender,martialId:'martial_basic_sword',rng}),b=resolveCombatAction({attacker:bone,defender,martialId:'martial_basic_sword',rng});assert.ok(b.damage>a.damage)});
 test('四次有效实战出剑约等于闭门修炼一天',()=>{const base=make(),daily=trainMartial(base,'martial_basic_sword',24).result.masteryGain;let c=base,total=0;for(let i=0;i<4;i++){const out=practiceMartialInCombat(c,'martial_basic_sword',{hit:true});c=out.character;total+=out.result.masteryGain;}assert.ok(total>=daily*.9&&total<=daily*1.1,`combat ${total} daily ${daily}`)});
 test('基础吐纳修炼会推动真实内力阶段和江湖层级',()=>{let c=createCharacter({originId:'hunter',baseAttributes:BASE});c=learnMartial(c,'martial_basic_breathing',{commonAccess:true});let s=createSession(c);s=trainMartialSession(s,'martial_basic_breathing',24).session;s=trainMartialSession(s,'martial_basic_breathing',24).session;assert.notEqual(innerStage(s.character).id,'none');assert.notEqual(jianghuRank(s.character).id,'unranked')});
+test('单场战斗不能让低熟练武功从三流直接跨到二流',()=>{let c=make();c={...c,martialState:{...c.martialState,learned:{...c.martialState.learned,martial_basic_sword:{...c.martialState.learned.martial_basic_sword,mastery:300,understanding:5}}}};c=addProgress(c,{experience:900,innerExperience:450});assert.equal(jianghuRank(c).id,'third_rate');c=applyBattleProgress(c,{difficulty:3,win:true});assert.equal(jianghuRank(c).id,'third_rate');c={...c,martialState:{...c.martialState,learned:{...c.martialState.learned,martial_basic_sword:{...c.martialState.learned.martial_basic_sword,mastery:4000,understanding:12}}}};assert.equal(jianghuRank(c).id,'second_rate')});
+test('战斗界面和Canvas命中帧都必须显示伤害反馈',async()=>{const ui=await readFile(new URL('../src/ui/combatPrototype.js',import.meta.url),'utf8'),scene=await readFile(new URL('../src/combat-render/battleScene.js',import.meta.url),'utf8');assert.match(ui,/点伤害/);assert.match(ui,/combat-log/);assert.match(scene,/damagePopup/)});
 test('福威旧宅转移线索不再一键结局，随后可回去找林震南继续',()=>{let s=createSession(createCharacter({originId:'hunter',baseAttributes:BASE}));s=place(s,'ming_fuzhou','ming_xiangyang_lane');s=interveneEventSession(s,'event_fuwei_crisis','remove_bixie_clue');assert.equal(s.worldState.events.entries.event_fuwei_crisis.phase,'diverted');assert.equal(s.worldState.events.entries.event_fuwei_crisis.terminal,false);s=place(s,'ming_fuzhou','ming_fuwei_escort');const actions=availableNpcInterventions(s.worldState,s.character,'npc_lin_zhennan');assert.ok(actions.some(x=>x.intervention.id==='report_diversion'))});
 test('三个固定实战点全部引用真实场景',()=>{assert.equal(MING_TRAINING_ENCOUNTERS.length,3);for(const e of MING_TRAINING_ENCOUNTERS){const loc=MING_LOCATION_BY_ID[e.locationId];assert.ok(loc);assert.ok(loc.scenes.some(s=>s.id===e.sceneId),e.sceneId)}});
