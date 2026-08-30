@@ -9,6 +9,7 @@ import {loadSession,saveSession} from '../save/saveManager.js';
 import {renderMartialPanel} from './martialPanel.js';
 import {mountCombatPrototype} from './combatPrototype.js';
 import {renderEventPanel} from './eventPanel.js';
+import {canUseLuoyangSparring} from './locationFeatures.js';
 
 const OTHER_COUNTRIES=['大唐','大宋','大清','大理','辽','西夏','蒙古','神州','西域诸国','海外'];
 const state={slot:0,session:null,view:'world',focusLocationId:null,returnView:'country',martialMessage:'',eventMessage:''};
@@ -55,7 +56,7 @@ function npcBlock(location){
 }
 
 function sparringBlock(){
-  if(character().world.location!=='ming_luoyang'||character().world.scene!=='ming_luoyang_martial_hall')return'';
+  if(!canUseLuoyangSparring(character()))return'';
   return'<div class="travel-box"><b>武馆演武场</b><span>用你真正学会的基础武功与教习切磋。战斗使用Canvas动态表现。</span><button data-open-combat>切磋试招</button></div>';
 }
 
