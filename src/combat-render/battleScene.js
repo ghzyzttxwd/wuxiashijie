@@ -44,7 +44,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
       const hitClip=timeline.clips.find(x=>x.event.type==='hit'),hitStarted=Boolean(hitClip&&elapsed>=hitClip.startMs);
       const leftHp=left.id===targetId&&hitStarted?after.left.hp:before.left.hp;
       const rightHp=right.id===targetId&&hitStarted?after.right.hp:before.right.hp;
-      renderer.render({camera,left,right,leftHp,rightHp,leftMaxHp:after.left.maxHp,rightMaxHp:after.right.maxHp,particles,martialId,trailProgress,impact,title});
+      renderer.render({camera,left,right,leftHp,rightHp,leftMaxHp:after.left.maxHp,rightMaxHp:after.right.maxHp,particles,martialId,attackerId,trailProgress,impact,title});
       if(elapsed<timeline.totalMs+80)requestAnimationFrame(frame);else resolve();
     }
     requestAnimationFrame(frame);
