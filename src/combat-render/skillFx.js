@@ -13,18 +13,18 @@ function drawSlashRibbon(ctx,{attacker,target,progress,width=18,offsetY=-30}){
 
 export function drawSkillTrail(ctx,{martialId,attacker,target,progress}){
   const fx=M5_FX_BY_MARTIAL_ID[martialId];if(!fx)return;
-  const p=Math.max(0,Math.min(1,progress));ctx.save();
+  const p=Math.max(0,Math.min(1,progress));if(p<=.01)return;ctx.save();
   if(fx.trail==='short'){
     const dir=attacker.side,x=attacker.x-dir*70,y=attacker.y-32;
     const grad=ctx.createLinearGradient(x,y,attacker.x,y);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(1,'rgba(255,255,255,.72)');ctx.globalAlpha=.25+.45*(1-p);ctx.fillStyle=grad;ctx.fillRect(Math.min(x,attacker.x),y,Math.abs(attacker.x-x),10);
   }else if(fx.trail==='sword-arc'){
     drawSlashRibbon(ctx,{attacker,target,progress:p,width:10,offsetY:-42});
-    drawArc(ctx,{x:target.x-target.side*18,y:target.y-34,radius:70,start:-2.12,end:.05,width:7,alpha:.78});
-    drawArc(ctx,{x:target.x-target.side*11,y:target.y-34,radius:57,start:-2,end:-.12,width:2,alpha:.55});
+    const hitAlpha=Math.max(0,Math.min(1,(p-.52)*2.7));
+    if(hitAlpha>0){drawArc(ctx,{x:target.x-target.side*18,y:target.y-34,radius:70,start:-2.12,end:.05,width:7,alpha:.78*hitAlpha});drawArc(ctx,{x:target.x-target.side*11,y:target.y-34,radius:57,start:-2,end:-.12,width:2,alpha:.55*hitAlpha});}
   }else if(fx.trail==='saber-arc'){
     drawSlashRibbon(ctx,{attacker,target,progress:p,width:17,offsetY:-38});
-    drawArc(ctx,{x:target.x-target.side*10,y:target.y-24,radius:88,start:-2.35,end:.22,width:12,alpha:.82});
-    drawArc(ctx,{x:target.x-target.side*2,y:target.y-19,radius:74,start:-2.2,end:.05,width:3,alpha:.5});
+    const hitAlpha=Math.max(0,Math.min(1,(p-.5)*2.5));
+    if(hitAlpha>0){drawArc(ctx,{x:target.x-target.side*10,y:target.y-24,radius:88,start:-2.35,end:.22,width:12,alpha:.82*hitAlpha});drawArc(ctx,{x:target.x-target.side*2,y:target.y-19,radius:74,start:-2.2,end:.05,width:3,alpha:.5*hitAlpha});}
   }else if(fx.trail==='qi-wave'){
     const x=attacker.x+(target.x-attacker.x)*p,y=target.y-30;
     drawWave(ctx,{x,y,radius:24+54*p,alpha:.38+.45*p,width:7});
