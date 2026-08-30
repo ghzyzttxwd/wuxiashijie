@@ -1,7 +1,7 @@
 export const FUWEI_CRISIS={
   id:'event_fuwei_crisis',name:'福威镖局风波',scope:'ming',initialPhase:'calm',summary:'围绕林家旧宅、辟邪剑谱与福威镖局逐渐逼近的危机。默认历史会恶化，但玩家和NPC都能改变结果。',
   phases:[
-    {id:'calm',name:'暗流初起',rumor:'福州近来多了些打听林家旧事的陌生江湖人。',transitions:[{to:'prepared',priority:90,when:{flagsAll:['fuwei_warned']}},{to:'pressure',priority:10,when:{minDay:3}}]},
+    {id:'calm',name:'暗流初起',rumor:'福州近来多了些打听林家旧事的陌生江湖人。',transitions:[{to:'diverted',priority:100,when:{flagsAll:['bixie_clue_removed']}},{to:'prepared',priority:90,when:{flagsAll:['fuwei_warned']}},{to:'pressure',priority:10,when:{minDay:3}}]},
     {id:'pressure',name:'窥伺加剧',rumor:'福威镖局已察觉有人盯梢，林家上下仍未弄清真正来意。',transitions:[{to:'diverted',priority:100,when:{flagsAll:['bixie_clue_removed']}},{to:'prepared',priority:90,when:{flagsAll:['fuwei_warned']}},{to:'shattered',priority:85,when:{npcDead:['npc_lin_zhennan']}},{to:'assault',priority:10,when:{minDay:6}}]},
     {id:'diverted',name:'线索转移',rumor:'真正的剑谱线索已被挪开，但林家还不知道外面究竟发生了什么。现在最要紧的是把消息带回福威镖局。',transitions:[{to:'shattered',priority:110,when:{npcDead:['npc_lin_zhennan']}},{to:'prepared',priority:100,when:{flagsAll:['fuwei_diversion_reported']}},{to:'assault',priority:10,when:{minDay:8}}]},
     {id:'prepared',name:'林家戒备',rumor:'林家已经提前得了风声，福威镖局开始收缩人手、安排守夜。',transitions:[{to:'shattered',priority:100,when:{npcDead:['npc_lin_zhennan']}},{to:'survived',priority:90,when:{flagsAll:['fuwei_supported'],minDay:7}},{to:'assault',priority:10,when:{minDay:9}}]},
