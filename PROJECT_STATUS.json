@@ -1,0 +1,37 @@
+{
+  "project": "九州武侠",
+  "repo": "ghzyzttxwd/wuxiashijie",
+  "branch": "main",
+  "status": "planning-baseline-established",
+  "taskbookVersion": "1.1",
+  "targetPlayableVersion": "0.1",
+  "currentMilestone": "M0-baseline",
+  "nextMilestone": "M1-character-creation",
+  "commercialModel": "single-player-zero-iap",
+  "worldStructure": "country-region-location-scene",
+  "initialWorld": "大明",
+  "fengyunScope": "part-1-and-part-2-only",
+  "combatPolicy": "dynamic-visual-combat-required",
+  "powerPolicy": "no-cross-IP-equalization-use-feats-and-explicit-canon",
+  "v01": {
+    "attributes": 7,
+    "origins": 19,
+    "uniqueCheats": 15,
+    "coreDynamicNpcs": 20,
+    "martialArtsTarget": 30,
+    "majorDynamicEvents": 3,
+    "combatAnimationTemplates": 10
+  },
+  "hardRules": [
+    "no_iap",
+    "no_vip",
+    "no_gacha",
+    "world_runs_without_player",
+    "original_plot_is_mutable",
+    "stable_ids_required",
+    "save_schema_and_migrations_required",
+    "combat_must_not_be_text_only",
+    "do_not_expand_other_countries_before_v01_core_loop_works"
+  ],
+  "completionGate": "character-create -> enter-Daming -> travel -> npc-interact -> learn-martial -> animated-combat -> loot/event -> world-advances -> save -> reload-consistent"
+}
