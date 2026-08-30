@@ -1,0 +1,1 @@
+export const MING_HUASHAN={id:'ming_huashan',countryId:'ming',name:'华山',kind:'sect-region',risk:3,summary:'华山派所在。剑气之争的余波仍在，思过崖与后山藏有不为人知的旧事。',scenes:[{id:'ming_huashan_gate',name:'华山山门'},{id:'ming_huashan_hall',name:'正气堂'},{id:'ming_huashan_cliff',name:'思过崖'},{id:'ming_huashan_back',name:'华山后山'},{id:'ming_huashan_cave',name:'隐秘山洞'}]};
