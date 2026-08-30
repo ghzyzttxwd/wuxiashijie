@@ -1,0 +1,34 @@
+export const HULONG_DONGCHANG_CONFLICT={
+  id:'event_hulong_dongchang_conflict',name:'护龙山庄—东厂暗战',scope:'ming',initialPhase:'shadow_war',summary:'护龙山庄与东厂围绕朝局、情报和江湖控制权持续博弈。双方不会等玩家接任务才行动，关键人物死亡或情报泄露会改变升级方向。',
+  phases:[
+    {id:'shadow_war',name:'暗线交锋',rumor:'京城近来查得严，东厂与护龙山庄的人似乎都在暗中追查同一批线索。',transitions:[
+      {to:'hulong_wins',priority:120,when:{npcDead:['npc_cao_zhengchun']}},{to:'dongchang_wins',priority:115,when:{npcDead:['npc_zhu_wushi']}},
+      {to:'hulong_advantage',priority:100,when:{flagsAll:['dongchang_intel_leaked']}},{to:'dongchang_advantage',priority:95,when:{flagsAll:['hulong_intel_leaked']}},{to:'proxy_conflict',priority:10,when:{minDay:4}}
+    ]},
+    {id:'proxy_conflict',name:'代理人冲突',rumor:'密探、番子与江湖外围势力的冲突明显增多，京城已有数起不公开的抓捕和失踪。',transitions:[
+      {to:'hulong_wins',priority:120,when:{npcDead:['npc_cao_zhengchun']}},{to:'dongchang_wins',priority:115,when:{npcDead:['npc_zhu_wushi']}},
+      {to:'hulong_advantage',priority:100,when:{flagsAll:['support_hulong']}},{to:'dongchang_advantage',priority:95,when:{flagsAll:['support_dongchang']}},{to:'open_conflict',priority:10,when:{minDay:9}}
+    ]},
+    {id:'hulong_advantage',name:'山庄占先',rumor:'护龙山庄似乎抢先拿到了一批关键证据，东厂在朝堂和江湖两面都开始收缩。',transitions:[
+      {to:'dongchang_wins',priority:120,when:{npcDead:['npc_zhu_wushi']}},{to:'hulong_wins',priority:110,when:{npcDead:['npc_cao_zhengchun']}},
+      {to:'stalemate',priority:95,when:{flagsAll:['force_truce']}},{to:'hulong_wins',priority:10,when:{minDay:13},effects:{setFlags:{court_balance:'hulong'}}}
+    ]},
+    {id:'dongchang_advantage',name:'东厂占先',rumor:'东厂抓住了护龙山庄的一处破绽，朝中弹劾与秘密抓捕同时增多。',transitions:[
+      {to:'hulong_wins',priority:120,when:{npcDead:['npc_cao_zhengchun']}},{to:'dongchang_wins',priority:110,when:{npcDead:['npc_zhu_wushi']}},
+      {to:'stalemate',priority:95,when:{flagsAll:['force_truce']}},{to:'dongchang_wins',priority:10,when:{minDay:13},effects:{setFlags:{court_balance:'dongchang'}}}
+    ]},
+    {id:'open_conflict',name:'正面冲突',rumor:'山庄与东厂的矛盾已经压不住了，双方高手与兵力开始公开碰撞。',transitions:[
+      {to:'hulong_wins',priority:120,when:{npcDead:['npc_cao_zhengchun']}},{to:'dongchang_wins',priority:115,when:{npcDead:['npc_zhu_wushi']}},
+      {to:'stalemate',priority:100,when:{flagsAll:['force_truce']}},{to:'mutual_damage',priority:10,when:{minDay:15},effects:{setFlags:{court_conflict_bloodied:true}}}
+    ]},
+    {id:'hulong_wins',name:'山庄得势',terminal:true,rumor:'东厂在这一轮权力斗争中遭到重创，护龙山庄暂时占据上风。'},
+    {id:'dongchang_wins',name:'东厂得势',terminal:true,rumor:'护龙山庄遭遇重挫，东厂在京城的控制力进一步扩大。'},
+    {id:'stalemate',name:'暂时停火',terminal:true,rumor:'双方在更大压力下暂时收手，但这只是脆弱的停火。'},
+    {id:'mutual_damage',name:'两败俱伤',terminal:true,rumor:'山庄与东厂都付出了沉重代价，京城权力出现了新的真空。'}
+  ],
+  interventions:[
+    {id:'leak_dongchang_intel',name:'把东厂情报递给护龙山庄',locationId:'ming_capital',sceneId:'ming_hulong_gate',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{dongchang_intel_leaked:true,support_hulong:true}},
+    {id:'leak_hulong_intel',name:'把山庄情报递给东厂',locationId:'ming_capital',sceneId:'ming_east_depot',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{hulong_intel_leaked:true,support_dongchang:true}},
+    {id:'push_court_truce',name:'设法推动双方暂时停火',locationId:'ming_capital',sceneId:'ming_capital_street',allowedPhases:['hulong_advantage','dongchang_advantage','open_conflict'],setFlags:{force_truce:true}}
+  ]
+};
