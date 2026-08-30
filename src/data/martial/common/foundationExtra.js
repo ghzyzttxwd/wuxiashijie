@@ -1,0 +1,6 @@
+const M=(id,name,category,grade,summary,requirements,learnSources,training,combatTags)=>({id,name,source:'通用江湖',category,grade,summary,requirements,learnSources,training,combatTags});
+
+export const BASIC_LIGHTNESS=M('martial_basic_lightness','基础轻身术','lightness','入门','最基础的步法、腾挪与身体控制，用来建立移动、闪避和追击能力。',{attributes:{agility:35}},[{type:'common'}],{difficulty:13,masteryRate:1.18,understandingRate:.48},['movement','lightness','foundation']);
+export const BASIC_BREATHING=M('martial_basic_breathing','基础吐纳法','internal','入门','以呼吸和意念调整内息，是普通人真正接触内功前的基础。',{attributes:{root:35,will:32}},[{type:'common'}],{difficulty:15,masteryRate:1.08,understandingRate:.54},['internal','breathing','foundation']);
+export const GALE_FAST_SWORD=M('martial_gale_fast_sword','狂风快剑','sword','普通','以连续快攻和抢先手见长的江湖快剑路线。',{attributes:{agility:50,insight:43},prerequisites:['martial_basic_sword']},[{type:'manual',itemId:'manual_gale_fast_sword'}],{difficulty:34,masteryRate:.88,understandingRate:.61},['weapon','sword','fast','combo']);
+export const FIVE_TIGERS_SABER=M('martial_five_tigers_saber','五虎断门刀','saber','普通','实战性很强的成套刀法，重劈斩、压迫和连续进攻。',{attributes:{physique:46,agility:40},prerequisites:['martial_basic_saber']},[{type:'manual',itemId:'manual_five_tigers_saber'}],{difficulty:31,masteryRate:.92,understandingRate:.5},['weapon','saber','pressure','practical']);
