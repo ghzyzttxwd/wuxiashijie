@@ -11,8 +11,8 @@ export const WUYUE_MERGER={
     {id:'collapsed',name:'嵩山失主',terminal:true,rumor:'左冷禅已无法继续推动原计划，五岳历史进入全新的分支。'}
   ],
   interventions:[
-    {id:'expose_songshan_scheme',name:'公开嵩山暗中动作',locationId:'ming_huashan',sceneId:'ming_huashan_hall',allowedPhases:['plotting','pressure'],setFlags:{songshan_scheme_exposed:true}},
-    {id:'prepare_huashan',name:'协助华山提前应对并派',locationId:'ming_huashan',sceneId:'ming_huashan_hall',allowedPhases:['plotting','pressure','exposed'],setFlags:{huashan_prepared:true,support_huashan:true}},
-    {id:'oppose_merger',name:'公开反对五岳并派',locationId:'ming_songshan',sceneId:'ming_songshan_hall',allowedPhases:['pressure','exposed','conference'],setFlags:{player_blocks_merger:true}}
+    {id:'expose_songshan_scheme',name:'把掌握的嵩山暗中动作告诉岳不群',npcId:'npc_yue_buqun',locationId:'ming_huashan',sceneId:'ming_huashan_hall',allowedPhases:['plotting','pressure'],setFlags:{songshan_scheme_exposed:true}},
+    {id:'prepare_huashan',name:'与岳不群商议提前应对并派',npcId:'npc_yue_buqun',locationId:'ming_huashan',sceneId:'ming_huashan_hall',allowedPhases:['plotting','pressure','exposed'],setFlags:{huashan_prepared:true,support_huashan:true}},
+    {id:'oppose_merger',name:'当面向左冷禅表明反对并派',npcId:'npc_zuo_lengchan',locationId:'ming_songshan',sceneId:'ming_songshan_hall',allowedPhases:['pressure','exposed','conference'],setFlags:{player_blocks_merger:true}}
   ]
 };
