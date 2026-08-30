@@ -1,0 +1,45 @@
+name: visual-check
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate browser
+        id: browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$browser"
+          echo "path=$browser" >> "$GITHUB_OUTPUT"
+      - name: Start local static server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/jiuzhou-http.log 2>&1 &
+          echo $! > /tmp/jiuzhou-http.pid
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.5; done
+          cat /tmp/jiuzhou-http.log
+          exit 1
+      - name: Capture creation UI
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=800 --screenshot=artifacts/creation.png http://127.0.0.1:4173/
+          test -s artifacts/creation.png
+      - name: Capture combat impact frame
+        shell: bash
+        run: |
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=720 --screenshot=artifacts/combat.png http://127.0.0.1:4173/tools/visual-combat.html
+          test -s artifacts/combat.png
+      - name: Upload visual regression screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression
+          path: artifacts/*.png
+          if-no-files-found: error
