@@ -2,17 +2,18 @@
   "project": "九州武侠",
   "repo": "ghzyzttxwd/wuxiashijie",
   "branch": "main",
-  "status": "planning-baseline-established",
+  "status": "m1-character-creation-in-progress",
   "taskbookVersion": "1.1",
   "targetPlayableVersion": "0.1",
-  "currentMilestone": "M0-baseline",
-  "nextMilestone": "M1-character-creation",
+  "currentMilestone": "M1-character-creation",
+  "nextMilestone": "M2-daming-world-map",
   "commercialModel": "single-player-zero-iap",
   "worldStructure": "country-region-location-scene",
   "initialWorld": "大明",
   "fengyunScope": "part-1-and-part-2-only",
   "combatPolicy": "dynamic-visual-combat-required",
   "powerPolicy": "no-cross-IP-equalization-use-feats-and-explicit-canon",
+  "architecture": "modular-separated-data-logic-render-save",
   "v01": {
     "attributes": 7,
     "origins": 19,
@@ -31,7 +32,8 @@
     "stable_ids_required",
     "save_schema_and_migrations_required",
     "combat_must_not_be_text_only",
-    "do_not_expand_other_countries_before_v01_core_loop_works"
+    "do_not_expand_other_countries_before_v01_core_loop_works",
+    "do_not_build_monolithic_game_file"
   ],
   "completionGate": "character-create -> enter-Daming -> travel -> npc-interact -> learn-martial -> animated-combat -> loot/event -> world-advances -> save -> reload-consistent"
 }
