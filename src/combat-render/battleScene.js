@@ -19,7 +19,7 @@ function afterimageSet(attacker,dir,intensity=1){
 }
 function dustSet(x,y,dir,power=1){return[{x:x-dir*18,y:y+57,rx:30*power,ry:7,alpha:.18},{x:x-dir*48,y:y+59,rx:18*power,ry:5,alpha:.1}];}
 
-export function playCombatAnimation({canvas,beforeState,afterState,events,martialId}){
+export function playCombatAnimation({canvas,beforeState,afterState,events,martialId,freezeAt=null}){
   const renderer=new CombatRenderer(canvas),timeline=compileAnimationTimeline(events),camera=createCamera(),particles=createParticleSystem(),before=combatantsBySide(beforeState),after=combatantsBySide(afterState),fx=getFxProfile(martialId)||{},triggered=new Set();
   const leftBase={x:165,y:renderer.height*.78},rightBase={x:renderer.width-165,y:renderer.height*.78};
   const baseDistance=Math.abs(rightBase.x-leftBase.x),travel=Math.max(150,baseDistance-contactGap(fx));
@@ -43,7 +43,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
           afterimages=afterimageSet(attacker,dir,.82+.28*p);dust=dustSet(attacker.x,attacker.y,dir,1+p*.4);
         }
         if(event.type==='hit'){
-          const drive=travel+dir*0+26*Math.sin(Math.PI*p);attacker.x+=dir*drive;attacker.y-=12*Math.sin(Math.PI*p);attacker.lean=dir*(fx.motion==='charge-palm'?.2:.18);target.flash=Math.max(0,1-p*.9);trailProgress=.6+p*.4;
+          const drive=travel+26*Math.sin(Math.PI*p);attacker.x+=dir*drive;attacker.y-=12*Math.sin(Math.PI*p);attacker.lean=dir*(fx.motion==='charge-palm'?.2:.18);target.flash=Math.max(0,1-p*.9);trailProgress=.6+p*.4;
           afterimages=afterimageSet(attacker,dir,.82);dust=dustSet(attacker.x,attacker.y,dir,1.45);
           impact={martialId,x:target.x-dir*28,y:target.y-43,groundY:target.y+58,ageMs:p*260};
           if(!triggered.has(clip.id)){
@@ -68,7 +68,9 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
       const leftHp=left.id===targetId&&hitStarted?after.left.hp:before.left.hp;
       const rightHp=right.id===targetId&&hitStarted?after.right.hp:before.right.hp;
       renderer.render({camera,left,right,leftHp,rightHp,leftMaxHp:after.left.maxHp,rightMaxHp:after.right.maxHp,particles,martialId,attackerId,trailProgress,impact,title,afterimages,dust});
-      if(elapsed<timeline.totalMs+100)requestAnimationFrame(frame);else resolve();
+      const freezeEvent=freezeAt?.eventType,freezeProgress=freezeAt?.progress??.6;
+      if(freezeEvent&&event?.type===freezeEvent&&p>=freezeProgress){resolve({frozen:true,eventType:event.type,progress:p});return;}
+      if(elapsed<timeline.totalMs+100)requestAnimationFrame(frame);else resolve({frozen:false});
     }
     requestAnimationFrame(frame);
   });
