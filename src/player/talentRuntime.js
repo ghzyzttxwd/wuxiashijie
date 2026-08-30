@@ -8,3 +8,4 @@ export function combatStatTalentBonus(character){const combat=talentDefinition(c
 export function hasEventForesight(character){return Boolean(talentDefinition(character)?.effects?.eventForesight);}
 export function battleUnderstandingGain(character){return talentDefinition(character)?.effects?.battleUnderstandingGain||0;}
 export function lossGrowthEffect(character){return talentDefinition(character)?.effects?.lossGrowth||null;}
+export function applyLossGrowth(character){const effect=lossGrowthEffect(character);if(!effect)return{character,triggered:false};const p=character.progressionState||{},used=p.lossGrowthTriggers||0;if(used>=effect.maxTriggers)return{character,triggered:false};const attributes={...character.attributes};for(const[k,v]of Object.entries(effect))if(k!=='maxTriggers')attributes[k]=(attributes[k]||0)+v;return{character:{...character,attributes,progressionState:{...p,lossGrowthTriggers:used+1}},triggered:true};}
