@@ -1,0 +1,4 @@
+const M=(id,name,category,grade,summary,requirements,learnSources,training,combatTags)=>({id,name,source:'少林体系',category,grade,summary,requirements,learnSources,training,combatTags});
+
+export const YIJINJING=M('martial_yijinjing','易筋经','internal','顶级绝学','少林顶级内功路线，重塑根基、内息运转、恢复与武学兼容。',{attributes:{root:72,will:70,insight:60}},[{type:'faction',factionId:'faction_shaolin',minRelation:90},{type:'manual',itemId:'manual_yijinjing'}],{difficulty:94,masteryRate:.28,understandingRate:.45},['internal','shaolin','foundation-transform','recovery','compatibility']);
+export const GOLDEN_BELL=M('martial_shaolin_golden_bell','少林金钟罩','hardening','上乘','以外练与内息配合构建护体，是破防、钝击和横练体系的重要基准。',{attributes:{physique:58,root:50,will:45}},[{type:'faction',factionId:'faction_shaolin',minRelation:25},{type:'manual',itemId:'manual_shaolin_golden_bell'}],{difficulty:58,masteryRate:.62,understandingRate:.38},['hardening','shaolin','guard','armor']);
