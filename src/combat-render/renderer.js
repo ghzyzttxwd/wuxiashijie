@@ -2,7 +2,7 @@ import {applyCamera} from './camera.js';
 import {drawParticles} from './particles.js';
 import {drawSkillTrail,drawImpactFx} from './skillFx.js';
 
-function roundRect(ctx,x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,rr):(ctx.rect(x,y,w,h));}
+function roundRect(ctx,x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,rr):ctx.rect(x,y,w,h);}
 
 function drawBar(ctx,{x,y,w,value,max,label,align='left'}){
   const ratio=Math.max(0,Math.min(1,max?value/max:0));
@@ -32,12 +32,13 @@ export class CombatRenderer{
   constructor(canvas){if(!canvas)throw Error('canvas_required');this.canvas=canvas;this.ctx=canvas.getContext('2d');this.width=0;this.height=0;this.resize();}
   resize(){const rect=this.canvas.getBoundingClientRect(),dpr=Math.max(1,window.devicePixelRatio||1);this.width=Math.max(640,Math.round(rect.width||900));this.height=Math.max(360,Math.round(rect.height||500));this.canvas.width=Math.round(this.width*dpr);this.canvas.height=Math.round(this.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);}
   render(frame){
-    const {camera,left,right,leftHp,rightHp,leftMaxHp,rightMaxHp,particles=[],martialId=null,trailProgress=0,impact=null,title=''}=frame,ctx=this.ctx,w=this.width,h=this.height;
+    const {camera,left,right,leftHp,rightHp,leftMaxHp,rightMaxHp,particles=[],martialId=null,attackerId=null,trailProgress=0,impact=null,title=''}=frame,ctx=this.ctx,w=this.width,h=this.height;
     ctx.clearRect(0,0,w,h);ctx.save();applyCamera(ctx,camera,w,h);
     const grad=ctx.createLinearGradient(0,0,0,h);grad.addColorStop(0,'#181a1d');grad.addColorStop(1,'#090a0b');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
     ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(0,h*.72+i*10);ctx.lineTo(w,h*.72+i*2);ctx.stroke();}
     ctx.fillStyle='rgba(255,255,255,.04)';ctx.beginPath();ctx.arc(w*.18,h*.22,80,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(w*.82,h*.18,58,0,Math.PI*2);ctx.fill();
-    drawSkillTrail(ctx,{martialId,attacker:left.side===1?left:right,target:left.side===1?right:left,progress:trailProgress});
+    const attacker=left.id===attackerId?left:right,target=left.id===attackerId?right:left;
+    drawSkillTrail(ctx,{martialId,attacker,target,progress:trailProgress});
     drawFighter(ctx,left);drawFighter(ctx,right);
     if(impact)drawImpactFx(ctx,{martialId:impact.martialId,x:impact.x,y:impact.y,ageMs:impact.ageMs});
     drawParticles(ctx,particles);ctx.restore();
