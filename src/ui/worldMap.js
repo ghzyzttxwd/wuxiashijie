@@ -3,14 +3,15 @@ import {MING_LOCATIONS,MING_LOCATION_BY_ID} from '../data/locations/ming/index.j
 import {MING_CORE_NPC_BY_ID} from '../data/npcs/ming/index.js';
 import {findShortestRoute} from '../world/routePlanner.js';
 import {npcsAtLocation} from '../npc/simulation.js';
-import {ensureSession,syncSessionWorld,travelSession,trainMartialSession} from '../core/sessionFactory.js';
+import {ensureSession,syncSessionWorld,travelSession,trainMartialSession,interveneEventSession} from '../core/sessionFactory.js';
 import {learnAtLuoyangHall} from '../martial/venues/luoyangHall.js';
 import {loadSession,saveSession} from '../save/saveManager.js';
 import {renderMartialPanel} from './martialPanel.js';
 import {mountCombatPrototype} from './combatPrototype.js';
+import {renderEventPanel} from './eventPanel.js';
 
 const OTHER_COUNTRIES=['大唐','大宋','大清','大理','辽','西夏','蒙古','神州','西域诸国','海外'];
-const state={slot:0,session:null,view:'world',focusLocationId:null,returnView:'country',martialMessage:''};
+const state={slot:0,session:null,view:'world',focusLocationId:null,returnView:'country',martialMessage:'',eventMessage:''};
 const $=q=>document.querySelector(q),character=()=>state.session.character;
 
 function currentLocation(){return MING_LOCATION_BY_ID[character()?.world?.location]||null;}
@@ -18,16 +19,17 @@ function formatTime(){const w=character().world;return `第 ${w.day} 日 · ${St
 function routeText(location){if(location.id===character().world.location)return'当前所在';const route=findShortestRoute(character().world.location,location.id);return route?`约 ${route.hours} 小时`:'道路未通';}
 function persist(){saveSession(state.slot,state.session);}
 function sceneName(location,sceneId){return location.scenes.find(x=>x.id===sceneId)?.name||sceneId;}
-function errorText(error){const map={not_at_luoyang_hall:'你不在洛阳武馆街。',martial_not_taught_here:'这里不传这门武功。',already_learned:'这门武功你已经会了。',not_enough_silver:'银两不够。',martial_not_learned:'尚未学会这门武功。'};return map[error?.message]||`无法执行：${error?.message||'未知原因'}`;}
+function errorText(error){const map={not_at_luoyang_hall:'你不在洛阳武馆街。',martial_not_taught_here:'这里不传这门武功。',already_learned:'这门武功你已经会了。',not_enough_silver:'银两不够。',martial_not_learned:'尚未学会这门武功。',unknown_event:'这条江湖大事不存在。',unknown_intervention:'这个干预机会已经不存在。',intervention_not_available_in_phase:'局势已经变化，这个机会错过了。',intervention_wrong_location:'你必须亲自到对应地点才能插手。'};return map[error?.message]||`无法执行：${error?.message||'未知原因'}`;}
 
 function renderShell(){
   const root=$('#world-root');root.hidden=false;$('#creation-root').hidden=true;
-  root.innerHTML=`<section class="world-top panel"><div><p class="eyebrow">九州武侠 · M5</p><h1 id="world-character-name"></h1><p id="world-character-meta"></p></div><div class="world-status"><b id="world-location"></b><span id="world-time"></span><span id="world-silver"></span></div></section><nav class="world-nav panel"><button data-world-home>天下列国</button><button data-country="ming">大明</button><button data-martial>武学</button><button data-return-create>返回角色页</button></nav><section id="world-content" class="panel world-content"></section>`;
+  root.innerHTML=`<section class="world-top panel"><div><p class="eyebrow">九州武侠 · M8</p><h1 id="world-character-name"></h1><p id="world-character-meta"></p></div><div class="world-status"><b id="world-location"></b><span id="world-time"></span><span id="world-silver"></span></div></section><nav class="world-nav panel"><button data-world-home>天下列国</button><button data-country="ming">大明</button><button data-martial>武学</button><button data-events>江湖志</button><button data-return-create>返回角色页</button></nav><section id="world-content" class="panel world-content"></section>`;
   root.querySelector('#world-character-name').textContent=character().name;
   root.querySelector('#world-character-meta').textContent='江湖初行 · 大明';
   root.querySelector('[data-world-home]').onclick=()=>{state.view='world';state.focusLocationId=null;renderContent();};
   root.querySelector('[data-country]').onclick=()=>{state.view='country';state.focusLocationId=null;renderContent();};
   root.querySelector('[data-martial]').onclick=()=>{state.returnView=state.view==='martial'?'country':state.view;state.view='martial';state.martialMessage='';renderContent();};
+  root.querySelector('[data-events]').onclick=()=>{state.returnView=['events','combat'].includes(state.view)?'country':state.view;state.view='events';state.eventMessage='';renderContent();};
   root.querySelector('[data-return-create]').onclick=()=>{root.hidden=true;$('#creation-root').hidden=false;};
   renderContent();
 }
@@ -48,12 +50,12 @@ function renderCountry(){
 
 function npcBlock(location){
   const states=npcsAtLocation(state.session.worldState.npc,location.id);
-  if(!states.length)return'<div class="npc-section"><h3>此刻人物</h3><p>此刻没有核心人物在此活动。</p></div>';
+  if(!states.length)return'<div class="npc-section"><h3>此刻人物</h3><p>此刻没有已知核心人物在此活动。</p></div>';
   return`<div class="npc-section"><h3>此刻人物</h3><div class="npc-grid">${states.map(npcState=>{const def=MING_CORE_NPC_BY_ID[npcState.id];return`<article class="npc-card"><b>${def?.name||npcState.id}</b><span>${def?.role||''}</span><small>${sceneName(location,npcState.sceneId)} · ${npcState.activity}</small><em>${npcState.alive?'在世':'已故'}</em></article>`;}).join('')}</div></div>`;
 }
 
 function sparringBlock(){
-  if(character().world.location!=='ming_luoyang'||character().world.scene!=='luoyang_martial_hall')return'';
+  if(character().world.location!=='ming_luoyang'||character().world.scene!=='ming_luoyang_martial_hall')return'';
   return'<div class="travel-box"><b>武馆演武场</b><span>用你真正学会的基础武功与教习切磋。战斗使用Canvas动态表现。</span><button data-open-combat>切磋试招</button></div>';
 }
 
@@ -72,11 +74,16 @@ function renderMartial(){
   renderMartialPanel(content,state.session,{message:state.martialMessage,onBack:()=>{state.view=state.returnView==='martial'?'country':state.returnView;renderContent();},onLearn:id=>{try{state.session=learnAtLuoyangHall(state.session,id);state.martialMessage='教习传授了基础法门。一个时辰过去，江湖也没有停下。';persist();}catch(error){state.martialMessage=errorText(error);}renderContent();},onTrain:id=>{try{const out=trainMartialSession(state.session,id,2);state.session=out.session;state.martialMessage=`修炼两小时：熟练 +${out.result.masteryGain}，理解 +${out.result.understandingGain}。`;persist();}catch(error){state.martialMessage=errorText(error);}renderContent();}});
 }
 
+function renderEvents(){
+  const content=$('#world-content');
+  renderEventPanel(content,state.session,{message:state.eventMessage,onBack:()=>{state.view=['events','combat'].includes(state.returnView)?'country':state.returnView;renderContent();},onIntervene:(eventId,interventionId)=>{try{state.session=interveneEventSession(state.session,eventId,interventionId);state.eventMessage='你已经插手此事。江湖局势随之发生变化。';persist();}catch(error){state.eventMessage=errorText(error);}renderContent();}});
+}
+
 function renderCombat(){
   const content=$('#world-content');
   mountCombatPrototype(content,state.session,{onBack:()=>{state.view='location';renderContent();},onFinish:next=>{state.session=next;persist();state.view='location';renderContent();}});
 }
 
-function renderContent(){renderHeader();if(state.view==='world')renderWorld();else if(state.view==='country')renderCountry();else if(state.view==='martial')renderMartial();else if(state.view==='combat')renderCombat();else renderLocation();}
+function renderContent(){renderHeader();if(state.view==='world')renderWorld();else if(state.view==='country')renderCountry();else if(state.view==='martial')renderMartial();else if(state.view==='events')renderEvents();else if(state.view==='combat')renderCombat();else renderLocation();}
 
-export function initWorldMap(slot){const loaded=loadSession(slot);if(!loaded)throw Error('empty_slot');state.slot=slot;state.session=syncSessionWorld(ensureSession(loaded));persist();state.view='world';state.focusLocationId=null;state.martialMessage='';renderShell();}
+export function initWorldMap(slot){const loaded=loadSession(slot);if(!loaded)throw Error('empty_slot');state.slot=slot;state.session=syncSessionWorld(ensureSession(loaded));persist();state.view='world';state.focusLocationId=null;state.martialMessage='';state.eventMessage='';renderShell();}
