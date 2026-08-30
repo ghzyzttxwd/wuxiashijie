@@ -38,10 +38,10 @@ jobs:
           mkdir -p artifacts
           '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=900 --screenshot=artifacts/creation.png http://127.0.0.1:4173/
           test -s artifacts/creation.png
-      - name: Capture combat impact frame
+      - name: Capture deterministic combat impact frame
         shell: bash
         run: |
-          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=430 --screenshot=artifacts/combat.png http://127.0.0.1:4173/tools/visual-combat.html
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=1500 --screenshot=artifacts/combat.png 'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact'
           test -s artifacts/combat.png
       - name: Upload visual regression screenshots
         uses: actions/upload-artifact@v4
