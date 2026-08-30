@@ -1,13 +1,23 @@
 import {MARTIAL_BY_ID} from '../data/martial/index.js';
 
 export const PROGRESSION_SCHEMA=1;
+const GRADE_TIER={
+  '入门':0,
+  '普通':1,
+  '高级':2,
+  '高级体系':2,
+  '上乘':2,
+  '绝学':3,
+  '高级绝学':3,
+  '顶级绝学':4
+};
 export const JIANGHU_RANKS=[
-  {id:'unranked',name:'不入流',min:0,minMastery:0,minInner:0,minUnderstanding:0},
-  {id:'third_rate',name:'三流',min:100,minMastery:200,minInner:0,minUnderstanding:0},
-  {id:'second_rate',name:'二流',min:1000,minMastery:4000,minInner:450,minUnderstanding:12},
-  {id:'first_rate',name:'一流',min:3500,minMastery:7000,minInner:1200,minUnderstanding:25},
-  {id:'top',name:'顶尖',min:9000,minMastery:9000,minInner:3000,minUnderstanding:45},
-  {id:'peerless',name:'绝顶',min:20000,minMastery:10000,minInner:7000,minUnderstanding:70}
+  {id:'unranked',name:'不入流',min:0,minMastery:0,minInner:0,minUnderstanding:0,minGradeTier:0},
+  {id:'third_rate',name:'三流',min:150,minMastery:1500,minInner:0,minUnderstanding:3,minGradeTier:0},
+  {id:'second_rate',name:'二流',min:1200,minMastery:7000,minInner:450,minUnderstanding:20,minGradeTier:0},
+  {id:'first_rate',name:'一流',min:4000,minMastery:7000,minInner:1200,minUnderstanding:30,minGradeTier:1},
+  {id:'top',name:'顶尖',min:9500,minMastery:8500,minInner:3000,minUnderstanding:50,minGradeTier:2},
+  {id:'peerless',name:'绝顶',min:20000,minMastery:9500,minInner:7000,minUnderstanding:75,minGradeTier:3}
 ];
 export const INNER_STAGES=[
   {id:'none',name:'未成内息',min:0,capacity:0},
@@ -21,9 +31,10 @@ export const INNER_STAGES=[
 function baseProgression(){return{schema:PROGRESSION_SCHEMA,experience:0,innerExperience:0,lossGrowthTriggers:0,battles:0,wins:0};}
 export function ensureProgression(character){const existing=character.progressionState||{},p=existing?.schema===PROGRESSION_SCHEMA?existing:{...existing,schema:PROGRESSION_SCHEMA};return{...character,progressionState:{...baseProgression(),...p}};}
 function learnedEntries(character){return Object.values(character.martialState?.learned||{});}
-function martialPeak(character){const entries=learnedEntries(character);return{mastery:entries.reduce((m,x)=>Math.max(m,x.mastery||0),0),understanding:entries.reduce((m,x)=>Math.max(m,x.understanding||0),0)};}
+function entryGradeTier(entry){return GRADE_TIER[MARTIAL_BY_ID[entry.id]?.grade]??0;}
+function martialPeak(character){const entries=learnedEntries(character);return{mastery:entries.reduce((m,x)=>Math.max(m,x.mastery||0),0),understanding:entries.reduce((m,x)=>Math.max(m,x.understanding||0),0),gradeTier:entries.reduce((m,x)=>Math.max(m,entryGradeTier(x)),0)};}
 export function powerScore(character){const c=ensureProgression(character),top=learnedEntries(c).map(x=>x.mastery||0).sort((a,b)=>b-a).slice(0,3),martialScore=top.reduce((a,b)=>a+b,0)*.15,innerScore=(c.progressionState.innerExperience||0)*.22;return Math.round((c.progressionState.experience||0)+martialScore+innerScore);}
-export function rankRequirements(character,rank){const c=ensureProgression(character),peak=martialPeak(c),score=powerScore(c),inner=c.progressionState.innerExperience||0;return{score:{value:score,required:rank.min,ok:score>=rank.min},mastery:{value:peak.mastery,required:rank.minMastery||0,ok:peak.mastery>=(rank.minMastery||0)},inner:{value:inner,required:rank.minInner||0,ok:inner>=(rank.minInner||0)},understanding:{value:peak.understanding,required:rank.minUnderstanding||0,ok:peak.understanding>=(rank.minUnderstanding||0)}};}
+export function rankRequirements(character,rank){const c=ensureProgression(character),peak=martialPeak(c),score=powerScore(c),inner=c.progressionState.innerExperience||0;return{score:{value:score,required:rank.min,ok:score>=rank.min},mastery:{value:peak.mastery,required:rank.minMastery||0,ok:peak.mastery>=(rank.minMastery||0)},inner:{value:inner,required:rank.minInner||0,ok:inner>=(rank.minInner||0)},understanding:{value:peak.understanding,required:rank.minUnderstanding||0,ok:peak.understanding>=(rank.minUnderstanding||0)},grade:{value:peak.gradeTier,required:rank.minGradeTier||0,ok:peak.gradeTier>=(rank.minGradeTier||0)}};}
 export function qualifiesForRank(character,rank){return Object.values(rankRequirements(character,rank)).every(x=>x.ok);}
 export function jianghuRank(character){return [...JIANGHU_RANKS].reverse().find(rank=>qualifiesForRank(character,rank))||JIANGHU_RANKS[0];}
 export function innerStage(character){const exp=ensureProgression(character).progressionState.innerExperience||0;return [...INNER_STAGES].reverse().find(x=>exp>=x.min)||INNER_STAGES[0];}
