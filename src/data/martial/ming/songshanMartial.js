@@ -1,0 +1,4 @@
+const M=(id,name,category,grade,summary,requirements,learnSources,training,combatTags)=>({id,name,source:'笑傲江湖',category,grade,summary,requirements,learnSources,training,combatTags});
+
+export const SONGSHAN_SWORD=M('martial_songshan_sword','嵩山剑法','sword','普通','嵩山派剑术重正面压迫、沉稳剑势与组织严密的连招。',{attributes:{physique:44,agility:42,insight:40}},[{type:'faction',factionId:'faction_songshan',minRelation:0},{type:'teacher',npcId:'npc_zuo_lengchan',minRelation:15},{type:'manual',itemId:'manual_songshan_sword'}],{difficulty:30,masteryRate:.9,understandingRate:.54},['weapon','sword','songshan','pressure']);
+export const ICE_QI=M('martial_ice_qi','寒冰真气','internal','绝学','左冷禅体系的寒性真气，重内力性质、侵体压制与持续削弱。',{attributes:{root:62,will:58,insight:50}},[{type:'teacher',npcId:'npc_zuo_lengchan',minRelation:78},{type:'manual',itemId:'manual_ice_qi'}],{difficulty:76,masteryRate:.43,understandingRate:.5},['internal','songshan','cold','debuff','qi-control']);
