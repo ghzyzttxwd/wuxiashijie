@@ -1,0 +1,29 @@
+name: public-smoke
+on:
+  push:
+    branches: [gh-pages]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  http-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify public playable endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://ghzyzttxwd.github.io/wuxiashijie'
+          ok=0
+          for i in {1..30}; do
+            if html="$(curl -fsSL --max-time 15 "$base/" 2>/dev/null)" && grep -q '九州武侠' <<<"$html"; then ok=1; break; fi
+            sleep 2
+          done
+          test "$ok" = 1
+          app="$(curl -fsSL --max-time 15 "$base/src/app.js")"
+          grep -q 'initCharacterCreation' <<<"$app"
+          world="$(curl -fsSL --max-time 15 "$base/src/ui/worldMap.js")"
+          grep -q '江湖志' <<<"$world"
+          curl -fsSL --max-time 15 "$base/styles/main.css" >/dev/null
+          curl -fsSL --max-time 15 "$base/styles/combat.css" >/dev/null
+          echo "PUBLIC_HTTP_PASS $base/"
