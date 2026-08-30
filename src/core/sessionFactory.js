@@ -2,9 +2,10 @@ import {createNpcWorld,advanceNpcWorld}from'../npc/simulation.js';
 import {travelCharacter,advanceWorldTime}from'../world/travel.js';
 import {learnMartial}from'../martial/learning.js';
 import {trainMartial}from'../martial/training.js';
+import {ensureMartialState}from'../martial/state.js';
 export const SESSION_SCHEMA=1;
-export function createSession(character){return{schema:SESSION_SCHEMA,character,worldState:{npc:createNpcWorld(character.world),events:{},factions:{}}};}
-export function ensureSession(session){if(!session?.character)throw Error('invalid_session');if(session.worldState?.npc)return session;return{...session,worldState:{events:{},factions:{},...(session.worldState||{}),npc:createNpcWorld(session.character.world)}};}
+export function createSession(character){const normalized=ensureMartialState(character);return{schema:SESSION_SCHEMA,character:normalized,worldState:{npc:createNpcWorld(normalized.world),events:{},factions:{}}};}
+export function ensureSession(session){if(!session?.character)throw Error('invalid_session');const character=ensureMartialState(session.character);if(session.worldState?.npc)return character===session.character?session:{...session,character};return{...session,character,worldState:{events:{},factions:{},...(session.worldState||{}),npc:createNpcWorld(character.world)}};}
 export function syncSessionWorld(session){const s=ensureSession(session);return{...s,worldState:{...s.worldState,npc:advanceNpcWorld(s.worldState.npc,s.character.world)}};}
 export function advanceSessionHours(session,hours){if(!Number.isFinite(hours)||hours<0)throw Error('invalid_hours');const s=ensureSession(session),world=advanceWorldTime(s.character.world,hours),character={...s.character,world};return{...s,character,worldState:{...s.worldState,npc:advanceNpcWorld(s.worldState.npc,world)}};}
 export function travelSession(session,destinationId){const s=ensureSession(session),character=travelCharacter(s.character,destinationId);return{...s,character,worldState:{...s.worldState,npc:advanceNpcWorld(s.worldState.npc,character.world)}};}
