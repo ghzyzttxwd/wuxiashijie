@@ -9,21 +9,42 @@ jobs:
   http-smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify public playable endpoint
+      - uses: actions/checkout@v4
+      - name: Verify public playable endpoint matches published branch
         shell: bash
         run: |
           set -euo pipefail
           base='https://ghzyzttxwd.github.io/wuxiashijie'
-          ok=0
-          for i in {1..30}; do
-            if html="$(curl -fsSL --max-time 15 "$base/" 2>/dev/null)" && grep -q '九州武侠' <<<"$html"; then ok=1; break; fi
+          files=(
+            'src/ui/worldMap.js'
+            'src/ui/martialPanel.js'
+            'styles/main.css'
+            'styles/martial.css'
+          )
+          html_ok=0
+          for i in {1..45}; do
+            if html="$(curl -fsSL --max-time 15 "$base/" 2>/dev/null)" && grep -q '九州武侠' <<<"$html"; then html_ok=1; break; fi
             sleep 2
           done
-          test "$ok" = 1
+          test "$html_ok" = 1
+
+          for file in "${files[@]}"; do
+            expected="$(sha256sum "$file" | awk '{print $1}')"
+            matched=0
+            for i in {1..45}; do
+              if curl -fsSL --max-time 15 "$base/$file" -o /tmp/public-file; then
+                actual="$(sha256sum /tmp/public-file | awk '{print $1}')"
+                if [ "$actual" = "$expected" ]; then matched=1; break; fi
+              fi
+              sleep 2
+            done
+            if [ "$matched" != 1 ]; then
+              echo "PUBLIC_HASH_MISMATCH $file expected=$expected actual=${actual:-unavailable}"
+              exit 1
+            fi
+            echo "PUBLIC_HASH_OK $file $expected"
+          done
+
           app="$(curl -fsSL --max-time 15 "$base/src/app.js")"
           grep -q 'initCharacterCreation' <<<"$app"
-          world="$(curl -fsSL --max-time 15 "$base/src/ui/worldMap.js")"
-          grep -q '江湖志' <<<"$world"
-          curl -fsSL --max-time 15 "$base/styles/main.css" >/dev/null
-          curl -fsSL --max-time 15 "$base/styles/combat.css" >/dev/null
           echo "PUBLIC_HTTP_PASS $base/"
