@@ -1,0 +1,5 @@
+import test from'node:test';import assert from'node:assert/strict';import{findShortestRoute}from'../src/world/routePlanner.js';import{travelCharacter}from'../src/world/travel.js';import{createCharacter}from'../src/player/characterFactory.js';
+const BASE={root:50,insight:50,physique:50,agility:50,will:50,fortune:50,charm:50};
+test('不同出身进入不同大明起点',()=>{const hunter=createCharacter({originId:'hunter',baseAttributes:BASE});const prince=createCharacter({originId:'prince_heir',baseAttributes:BASE});assert.equal(hunter.world.location,'ming_luoyang');assert.equal(prince.world.location,'ming_capital')});
+test('路线规划选择最短旅行时间',()=>{const route=findShortestRoute('ming_luoyang','ming_fuzhou');assert.equal(route.hours,48);assert.deepEqual(route.locations,['ming_luoyang','ming_capital','ming_fuzhou'])});
+test('旅行推进时间并改变当前位置',()=>{const c=createCharacter({originId:'hunter',baseAttributes:BASE});const moved=travelCharacter(c,'ming_huashan');assert.equal(moved.world.location,'ming_huashan');assert.equal(moved.world.day,1);assert.equal(moved.world.hour,18);assert.equal(moved.lastTravel.hours,10)});
