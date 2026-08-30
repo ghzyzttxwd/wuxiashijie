@@ -38,6 +38,11 @@ jobs:
           mkdir -p artifacts
           '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=900 --screenshot=artifacts/creation.png http://127.0.0.1:4173/
           test -s artifacts/creation.png
+      - name: Verify deterministic production impact state
+        shell: bash
+        run: |
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --virtual-time-budget=1500 --dump-dom 'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact' > artifacts/combat-dom.html
+          grep -q 'data-visual-ready="impact"' artifacts/combat-dom.html
       - name: Capture deterministic combat impact frame
         shell: bash
         run: |
