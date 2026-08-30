@@ -27,8 +27,8 @@ export const HULONG_DONGCHANG_CONFLICT={
     {id:'mutual_damage',name:'两败俱伤',terminal:true,rumor:'山庄与东厂都付出了沉重代价，京城权力出现了新的真空。'}
   ],
   interventions:[
-    {id:'leak_dongchang_intel',name:'把东厂情报递给护龙山庄',locationId:'ming_capital',sceneId:'ming_hulong_gate',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{dongchang_intel_leaked:true,support_hulong:true}},
-    {id:'leak_hulong_intel',name:'把山庄情报递给东厂',locationId:'ming_capital',sceneId:'ming_east_depot',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{hulong_intel_leaked:true,support_dongchang:true}},
-    {id:'push_court_truce',name:'设法推动双方暂时停火',locationId:'ming_capital',sceneId:'ming_capital_street',allowedPhases:['hulong_advantage','dongchang_advantage','open_conflict'],setFlags:{force_truce:true}}
+    {id:'leak_dongchang_intel',name:'把东厂情报交给朱无视',npcId:'npc_zhu_wushi',locationId:'ming_capital',sceneId:'ming_hulong_gate',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{dongchang_intel_leaked:true,support_hulong:true}},
+    {id:'leak_hulong_intel',name:'把山庄情报交给曹正淳',npcId:'npc_cao_zhengchun',locationId:'ming_capital',sceneId:'ming_east_depot',allowedPhases:['shadow_war','proxy_conflict'],setFlags:{hulong_intel_leaked:true,support_dongchang:true}},
+    {id:'push_court_truce',name:'在京城散布停火风声并联络中间人',locationId:'ming_capital',sceneId:'ming_capital_street',allowedPhases:['hulong_advantage','dongchang_advantage','open_conflict'],setFlags:{force_truce:true}}
   ]
 };
