@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Chinese fonts
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          fc-cache -f
       - name: Locate browser
         id: browser
         shell: bash
@@ -30,12 +36,12 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=800 --screenshot=artifacts/creation.png http://127.0.0.1:4173/
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=900 --screenshot=artifacts/creation.png http://127.0.0.1:4173/
           test -s artifacts/creation.png
       - name: Capture combat impact frame
         shell: bash
         run: |
-          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=720 --screenshot=artifacts/combat.png http://127.0.0.1:4173/tools/visual-combat.html
+          '${{ steps.browser.outputs.path }}' --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 --virtual-time-budget=430 --screenshot=artifacts/combat.png http://127.0.0.1:4173/tools/visual-combat.html
           test -s artifacts/combat.png
       - name: Upload visual regression screenshots
         uses: actions/upload-artifact@v4
