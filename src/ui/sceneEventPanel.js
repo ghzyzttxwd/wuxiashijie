@@ -1,0 +1,3 @@
+import {availableSceneInterventions}from'../event/interventions.js';
+export function renderSceneEventPanel(session){const actions=availableSceneInterventions(session.worldState,session.character);if(!actions.length)return'';return`<section class="scene-story"><div><p class="eyebrow">现场异动</p><h3>这里有可以直接调查或介入的事情</h3></div><div class="scene-story-actions">${actions.map(x=>`<button data-scene-event-id="${x.eventId}" data-scene-intervention-id="${x.intervention.id}">${x.intervention.name}</button>`).join('')}</div></section>`;}
+export function bindSceneEventPanel(root,onIntervene){root.querySelectorAll('[data-scene-intervention-id]').forEach(button=>button.onclick=()=>onIntervene?.(button.dataset.sceneEventId,button.dataset.sceneInterventionId));}
