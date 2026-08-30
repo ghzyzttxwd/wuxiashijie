@@ -53,9 +53,11 @@ function drawFighter(ctx,fighter,{alpha=1,ghost=false}={}){
   ctx.beginPath();ctx.ellipse(-2,-106,8,12,-.2,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.moveTo(-15,-70);ctx.quadraticCurveTo(-36,-48,-43,-7);ctx.lineTo(-28,2);ctx.lineTo(-18,-35);ctx.lineTo(-12,5);ctx.lineTo(14,5);ctx.lineTo(20,-39);ctx.lineTo(31,-3);ctx.lineTo(48,-12);ctx.quadraticCurveTo(38,-49,15,-70);ctx.closePath();ctx.fill();ctx.stroke();
   ctx.fillStyle=ghost?'rgba(255,255,255,.08)':'rgba(100,104,112,.68)';ctx.fillRect(-15,-33,31,6);
-  ctx.fillStyle=body;ctx.strokeStyle=edge;ctx.lineWidth=8;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(-8,1);ctx.lineTo(-19,43);ctx.lineTo(-32,63);ctx.moveTo(8,1);ctx.lineTo(20,43);ctx.lineTo(33,61);ctx.stroke();
-  ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(-14,-57);ctx.lineTo(-34,-25);ctx.moveTo(14,-57);ctx.lineTo(38,-32);ctx.stroke();
+  ctx.fillStyle=body;ctx.strokeStyle=edge;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-11,1);ctx.lineTo(-4,19);ctx.lineTo(-18,56);ctx.lineTo(-36,66);ctx.lineTo(-42,58);ctx.lineTo(-28,43);ctx.lineTo(-24,4);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(11,1);ctx.lineTo(5,19);ctx.lineTo(19,55);ctx.lineTo(36,64);ctx.lineTo(42,56);ctx.lineTo(29,42);ctx.lineTo(25,4);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle=ghost?'rgba(255,255,255,.09)':'rgba(78,82,90,.72)';ctx.beginPath();ctx.moveTo(-23,3);ctx.lineTo(23,3);ctx.lineTo(17,26);ctx.lineTo(-17,26);ctx.closePath();ctx.fill();
+  ctx.fillStyle=body;ctx.strokeStyle=edge;ctx.lineWidth=9;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-14,-57);ctx.lineTo(-34,-25);ctx.moveTo(14,-57);ctx.lineTo(38,-32);ctx.stroke();
   if(!ghost)drawWeapon(ctx,weapon,1);
   ctx.restore();
 }
@@ -64,9 +66,7 @@ function drawAfterimages(ctx,afterimages=[]){for(const image of afterimages)draw
 
 function drawGroundFeedback(ctx,{dust=[],impact=null}={}){
   ctx.save();
-  for(const d of dust){
-    ctx.globalAlpha=d.alpha??.22;ctx.fillStyle='rgba(220,220,220,.5)';ctx.beginPath();ctx.ellipse(d.x,d.y,d.rx||26,d.ry||7,0,0,Math.PI*2);ctx.fill();
-  }
+  for(const d of dust){ctx.globalAlpha=d.alpha??.22;ctx.fillStyle='rgba(220,220,220,.5)';ctx.beginPath();ctx.ellipse(d.x,d.y,d.rx||26,d.ry||7,0,0,Math.PI*2);ctx.fill();}
   if(impact){const p=Math.min(1,impact.ageMs/260);ctx.globalAlpha=(1-p)*.45;ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(impact.x,impact.groundY||impact.y+76,24+p*72,7+p*18,0,0,Math.PI*2);ctx.stroke();}
   ctx.restore();
 }
