@@ -1,0 +1,1 @@
+export const MING_FUZHOU={id:'ming_fuzhou',countryId:'ming',name:'福州',kind:'city',risk:2,summary:'福威镖局与辟邪剑谱事件的核心区域。',scenes:[{id:'ming_fuzhou_street',name:'福州街道'},{id:'ming_fuwei_escort',name:'福威镖局'},{id:'ming_fuzhou_inn',name:'福州客栈'},{id:'ming_xiangyang_lane',name:'向阳巷老宅'}]};
