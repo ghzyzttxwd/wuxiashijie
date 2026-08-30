@@ -1,2 +1,3 @@
-// M3将实现武学学习、熟练度、内功、招式与克制。
-export const MARTIAL_SCHEMA=1;
+export {MARTIAL_STATE_SCHEMA,MASTERY_MAX,UNDERSTANDING_MAX,ensureMartialState,hasMartial,masteryStage}from'./state.js';
+export {canLearnMartial,learnMartial}from'./learning.js';
+export {trainMartial}from'./training.js';
