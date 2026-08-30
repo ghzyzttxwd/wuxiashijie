@@ -1,0 +1,1 @@
+export const MING_CAPITAL={id:'ming_capital',countryId:'ming',name:'京城',kind:'city',risk:2,summary:'大明权力中心。朝堂、护龙山庄与东厂的暗线在这里交织。',scenes:[{id:'ming_capital_street',name:'京城街道'},{id:'ming_capital_inn',name:'京城客栈'},{id:'ming_hulong_gate',name:'护龙山庄入口'},{id:'ming_east_depot',name:'东厂衙门'},{id:'ming_prison_gate',name:'京城天牢入口'}]};
