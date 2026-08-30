@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>九州武侠 · 战斗视觉回归</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090a0c;color:#eee;font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif}body{display:grid;place-items:center;min-height:100vh;background:radial-gradient(circle at 50% 10%,#242830 0,#111318 38%,#07080a 100%)}main{width:min(1180px,94vw)}header{display:flex;align-items:end;justify-content:space-between;margin-bottom:14px}h1{margin:0;font:700 30px/1.1 serif}p{margin:5px 0 0;opacity:.68}.badge{border:1px solid #ffffff2b;border-radius:999px;padding:7px 12px;font-size:12px;letter-spacing:.1em}.stage{border:1px solid #ffffff22;border-radius:18px;padding:12px;background:#ffffff08;box-shadow:0 24px 80px #0008}canvas{display:block;width:100%;height:560px;border-radius:12px;background:#111}.foot{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;opacity:.55}
+</style>
+</head>
+<body><main><header><div><h1>洛阳武馆 · 动态切磋</h1><p>正式 combat / combat-render 模块视觉回归，不使用静态效果图。</p></div><span class="badge" id="status">基础剑法</span></header><section class="stage"><canvas id="combat-canvas"></canvas></section><div class="foot"><span>人物位移 · 受击 · 击退 · 粒子 · 镜头</span><span>九州武侠 V0.1</span></div></main><script type="module" src="./visual-combat.js"></script></body>
+</html>
