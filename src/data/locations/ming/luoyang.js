@@ -1,0 +1,1 @@
+export const MING_LUOYANG={id:'ming_luoyang',countryId:'ming',name:'洛阳',kind:'city',risk:1,summary:'大明江湖最适合作为普通人起步的中转城。武馆、镖局、黑市和各路江湖人汇聚。',scenes:[{id:'ming_luoyang_street',name:'洛阳街道'},{id:'ming_luoyang_inn',name:'悦来客栈'},{id:'ming_luoyang_market',name:'市集'},{id:'ming_luoyang_martial_hall',name:'武馆街'},{id:'ming_luoyang_black_market',name:'地下黑市'}]};
