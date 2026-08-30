@@ -2,6 +2,7 @@ export const REN_WOXING={
   id:'npc_ren_woxing',name:'任我行',source:'笑傲江湖',aiTier:'S',factionId:'faction_sunmoon',role:'被囚的日月神教前教主',homeLocationId:'ming_meizhuang',homeSceneId:'ming_meizhuang_prison',
   personality:{ambition:96,dominance:97,vengeance:94,patience:78},publicGoals:['脱离囚禁'],hiddenGoals:['重夺日月神教','清算东方不败'],
   routine:[{from:0,to:24,sceneId:'ming_meizhuang_prison',activity:'被囚于梅庄地牢'}],
+  visibility:{hidden:true,requiresDiscovery:true},
   stateFlags:{imprisoned:true}
 };
 
