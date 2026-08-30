@@ -2,8 +2,9 @@
   "project": "九州武侠",
   "repo": "ghzyzttxwd/wuxiashijie",
   "branch": "main",
-  "status": "m1-character-creation-in-progress",
+  "status": "m1-implemented-verification-in-progress",
   "taskbookVersion": "1.1",
+  "highestRules": "docs/HIGHEST_RULES.md",
   "targetPlayableVersion": "0.1",
   "currentMilestone": "M1-character-creation",
   "nextMilestone": "M2-daming-world-map",
@@ -13,11 +14,21 @@
   "fengyunScope": "part-1-and-part-2-only",
   "combatPolicy": "dynamic-visual-combat-required",
   "powerPolicy": "no-cross-IP-equalization-use-feats-and-explicit-canon",
-  "architecture": "modular-separated-data-logic-render-save",
-  "v01": {
+  "architecture": "modular-separated-data-logic-render-save-continuously-splittable",
+  "sourceFileHardLimitKiB": 48,
+  "m1": {
     "attributes": 7,
     "origins": 19,
     "uniqueCheats": 15,
+    "saveSlots": 5,
+    "structuredOriginGrants": true,
+    "stableIdCatalogs": ["items", "origin-assets", "starter-martial"],
+    "saveMigrationEntry": true,
+    "localAutomatedTests": "8/8-pass",
+    "githubActions": "configured",
+    "publicUiVerified": false
+  },
+  "v01": {
     "coreDynamicNpcs": 20,
     "martialArtsTarget": 30,
     "majorDynamicEvents": 3,
@@ -33,7 +44,9 @@
     "save_schema_and_migrations_required",
     "combat_must_not_be_text_only",
     "do_not_expand_other_countries_before_v01_core_loop_works",
-    "do_not_build_monolithic_game_file"
+    "do_not_build_monolithic_game_file",
+    "modules_and_directories_must_keep_splitting_when_needed",
+    "src_business_file_over_48KiB_must_split"
   ],
   "completionGate": "character-create -> enter-Daming -> travel -> npc-interact -> learn-martial -> animated-combat -> loot/event -> world-advances -> save -> reload-consistent"
 }
