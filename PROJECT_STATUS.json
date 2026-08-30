@@ -2,12 +2,12 @@
   "project": "九州武侠",
   "repo": "ghzyzttxwd/wuxiashijie",
   "branch": "main",
-  "status": "m1-core-complete-ci-pass-m2-started",
+  "status": "m2-core-complete-ci-pass",
   "taskbookVersion": "1.1",
   "highestRules": "docs/HIGHEST_RULES.md",
   "targetPlayableVersion": "0.1",
-  "currentMilestone": "M2-daming-world-map",
-  "nextMilestone": "M3-first-dynamic-npcs",
+  "currentMilestone": "M3-first-dynamic-npcs",
+  "nextMilestone": "M4-first-martial-system",
   "commercialModel": "single-player-zero-iap",
   "worldStructure": "country-region-location-scene",
   "initialWorld": "大明",
@@ -30,8 +30,21 @@
     "publicUiVerified": false
   },
   "m2": {
-    "status": "IN_PROGRESS",
-    "goal": "天下列国图 -> 大明 -> 地点 -> 场景 -> 旅行并保存位置时间"
+    "status": "PASS",
+    "country": "ming",
+    "locations": 7,
+    "routeGraph": true,
+    "shortestRoutePlanner": true,
+    "travelAdvancesWorldTime": true,
+    "travelPersistsToSave": true,
+    "originBasedSpawn": true,
+    "uiChain": "world -> ming -> location -> scene",
+    "githubActions": "success",
+    "publicUiVerified": false
+  },
+  "m3": {
+    "status": "NEXT",
+    "firstNpcIds": ["zhu_wushi", "yue_buqun", "linghu_chong", "zuo_lengchan", "lin_pingzhi"]
   },
   "v01": {
     "coreDynamicNpcs": 20,
