@@ -2,12 +2,12 @@
   "project": "九州武侠",
   "repo": "ghzyzttxwd/wuxiashijie",
   "branch": "main",
-  "status": "m1-implemented-verification-in-progress",
+  "status": "m1-core-complete-ci-pass-m2-started",
   "taskbookVersion": "1.1",
   "highestRules": "docs/HIGHEST_RULES.md",
   "targetPlayableVersion": "0.1",
-  "currentMilestone": "M1-character-creation",
-  "nextMilestone": "M2-daming-world-map",
+  "currentMilestone": "M2-daming-world-map",
+  "nextMilestone": "M3-first-dynamic-npcs",
   "commercialModel": "single-player-zero-iap",
   "worldStructure": "country-region-location-scene",
   "initialWorld": "大明",
@@ -17,6 +17,7 @@
   "architecture": "modular-separated-data-logic-render-save-continuously-splittable",
   "sourceFileHardLimitKiB": 48,
   "m1": {
+    "status": "PASS",
     "attributes": 7,
     "origins": 19,
     "uniqueCheats": 15,
@@ -25,8 +26,12 @@
     "stableIdCatalogs": ["items", "origin-assets", "starter-martial"],
     "saveMigrationEntry": true,
     "localAutomatedTests": "8/8-pass",
-    "githubActions": "configured",
+    "githubActions": "success",
     "publicUiVerified": false
+  },
+  "m2": {
+    "status": "IN_PROGRESS",
+    "goal": "天下列国图 -> 大明 -> 地点 -> 场景 -> 旅行并保存位置时间"
   },
   "v01": {
     "coreDynamicNpcs": 20,
