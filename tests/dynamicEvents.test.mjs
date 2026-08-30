@@ -1,8 +1,10 @@
 import test from'node:test';import assert from'node:assert/strict';
 import{EVENT_DATA}from'../src/data/events/index.js';import{MING_LOCATION_BY_ID}from'../src/data/locations/ming/index.js';import{MING_CORE_NPC_BY_ID}from'../src/data/npcs/ming/index.js';
 import{createCharacter}from'../src/player/characterFactory.js';import{createSession,advanceSessionHours,interveneEventSession,syncSessionWorld}from'../src/core/sessionFactory.js';
+import{saveSession,loadSession}from'../src/save/saveManager.js';import{canUseLuoyangSparring}from'../src/ui/locationFeatures.js';import{renderEventPanel}from'../src/ui/eventPanel.js';
 const BASE={root:60,insight:60,physique:60,agility:60,will:60,fortune:50,charm:50};
 const hunter=()=>createCharacter({originId:'hunter',baseAttributes:BASE});
+const memoryStorage=()=>{const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k)}};
 function phase(s,id){return s.worldState.events.entries[id].phase;}
 function place(s,location,scene){return{...s,character:{...s.character,world:{...s.character.world,location,scene}}};}
 
@@ -17,3 +19,9 @@ test('五岳线中华山已准备时左冷禅死亡可触发华山夺势',()=>{l
 test('朝廷暗战会因曹正淳提前死亡直接改线',()=>{let s=createSession(hunter());s.worldState.npc.states.npc_cao_zhengchun={...s.worldState.npc.states.npc_cao_zhengchun,alive:false,health:0};s=syncSessionWorld(s);assert.equal(phase(s,'event_hulong_dongchang_conflict'),'hulong_wins')});
 
 test('事件干预必须本人到正确场景',()=>{const s=createSession(hunter());assert.throws(()=>interveneEventSession(s,'event_hulong_dongchang_conflict','leak_dongchang_intel'),/intervention_wrong_location/)});
+
+test('事件旗标阶段和历史可随存档恢复',()=>{const storage=memoryStorage();let s=createSession(hunter());s=place(s,'ming_fuzhou','ming_fuwei_escort');s=interveneEventSession(s,'event_fuwei_crisis','warn_lin_family');saveSession(0,s,storage);const loaded=loadSession(0,storage);assert.equal(loaded.worldState.events.flags.fuwei_warned,true);assert.equal(loaded.worldState.events.entries.event_fuwei_crisis.phase,'prepared');assert.equal(loaded.worldState.events.entries.event_fuwei_crisis.history.at(-1).type,'transition')});
+
+test('洛阳演武场入口只认正式稳定场景ID',()=>{const c=hunter();c.world={...c.world,location:'ming_luoyang',scene:'ming_luoyang_martial_hall'};assert.equal(canUseLuoyangSparring(c),true);c.world.scene='luoyang_martial_hall';assert.equal(canUseLuoyangSparring(c),false)});
+
+test('江湖志UI模块可独立导入',()=>{assert.equal(typeof renderEventPanel,'function')});
