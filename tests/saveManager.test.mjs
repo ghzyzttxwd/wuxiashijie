@@ -1,0 +1,4 @@
+import test from'node:test';import assert from'node:assert/strict';import{deleteSlot,getSlots,loadCharacter,saveCharacter,SAVE_KEY,SLOT_COUNT}from'../src/save/saveManager.js';
+function memoryStorage(){const map=new Map();return{getItem:k=>map.has(k)?map.get(k):null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)}}
+test('多档位保存、读取、删除闭环',()=>{const storage=memoryStorage();assert.equal(getSlots(storage).length,SLOT_COUNT);saveCharacter(2,{id:'pc_test',name:'张三'},storage);assert.equal(loadCharacter(2,storage).name,'张三');deleteSlot(2,storage);assert.equal(loadCharacter(2,storage),null);assert.ok(storage.getItem(SAVE_KEY))});
+test('坏存档不会污染新档',()=>{const storage=memoryStorage();storage.setItem(SAVE_KEY,'{broken');assert.deepEqual(getSlots(storage),Array.from({length:SLOT_COUNT},()=>null))});
