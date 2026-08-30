@@ -2,49 +2,30 @@ import {createCombatant} from '../combat/combatant.js';
 import {createBattleState,executeAction} from '../combat/battleState.js';
 import {M5_COMBAT_ACTION_BY_MARTIAL_ID} from '../data/combat/m5Actions.js';
 import {MARTIAL_BY_ID} from '../data/martial/index.js';
+import {MING_ENCOUNTER_BY_ID}from'../data/encounters/ming.js';
 import {playCombatAnimation} from '../combat-render/battleScene.js';
 import {advanceSessionHours} from '../core/sessionFactory.js';
+import {practiceMartialInCombat,applyBattleInsight}from'../martial/combatPractice.js';
+import {characterVitals,applyBattleProgress}from'../player/progression.js';
+import {combatStatTalentBonus,applyLossGrowth}from'../player/talentRuntime.js';
 
-function playerCombatant(character){
-  const a=character.attributes||{},root=a.root||50,physique=a.physique||50,agility=a.agility||50;
-  return createCombatant({id:'player',name:character.name,maxHp:120+physique*2,attack:30+physique*.62+root*.22,defense:22+physique*.48+root*.2,speed:28+agility*.72,maxEnergy:60+root*.8,side:'left'});
-}
+function playerCombatant(character){const a=character.attributes||{},root=a.root||50,physique=a.physique||50,agility=a.agility||50,v=characterVitals(character),bonus=combatStatTalentBonus(character);return createCombatant({id:'player',name:character.name,maxHp:v.maxHp,attack:30+physique*.62+root*.22,defense:(22+physique*.48+root*.2)*bonus.defenseMultiplier,speed:28+agility*.72,maxEnergy:v.maxQi*bonus.energyMultiplier,side:'left',talentId:character.talentId||null});}
 function instructorCombatant(){return createCombatant({id:'instructor',name:'洛阳武馆教习',maxHp:190,attack:62,defense:48,speed:50,maxEnergy:100,side:'right'});}
+function encounterCombatant(encounter){const e=encounter.enemy;return createCombatant({id:'enemy',name:e.name,maxHp:e.maxHp,attack:e.attack,defense:e.defense,speed:e.speed,maxEnergy:e.maxEnergy,side:'right'});}
 function supportedKnown(character){return Object.keys(character.martialState?.learned||{}).filter(id=>M5_COMBAT_ACTION_BY_MARTIAL_ID[id]);}
 function hpText(battle,id){const c=battle.combatants[id];return`${Math.max(0,Math.round(c.hp))}/${Math.round(c.maxHp)}`;}
 
-export function mountCombatPrototype(root,session,{onBack,onFinish}){
-  const character=session.character,skills=supportedKnown(character);
-  if(character.world.location!=='ming_luoyang'||character.world.scene!=='luoyang_martial_hall'){
-    root.innerHTML='<div class="combat-empty"><h2>这里不能切磋</h2><p>先到洛阳武馆街进入武馆演武场。</p><button data-combat-back>返回</button></div>';root.querySelector('[data-combat-back]').onclick=onBack;return;
-  }
-  if(!skills.length){
-    root.innerHTML='<div class="combat-empty"><h2>还没有可用于演武的武功</h2><p>先在洛阳武馆学一门基础拳法、剑法或刀法。</p><button data-combat-back>返回</button></div>';root.querySelector('[data-combat-back]').onclick=onBack;return;
-  }
-
-  let battle=createBattleState({left:playerCombatant(character),right:instructorCombatant()}),busy=false,boutFinished=false;
-  root.innerHTML=`<section class="combat-shell"><div class="combat-heading"><div><p class="eyebrow">M5 · Canvas动态战斗原型</p><h2>洛阳武馆 · 演武切磋</h2><p>演武场提供木制刀剑。此阶段为不致死切磋，用来验证人物位移、受击、击退、Hit Stop、粒子与镜头反馈。</p></div><button data-combat-back>退出演武</button></div><canvas class="combat-canvas" data-combat-canvas></canvas><div class="combat-hud"><div><b>你：<span data-player-hp></span></b><small>选择你已经学会的武功出手。</small></div><div><b>教习：<span data-enemy-hp></span></b><small data-combat-message>双方抱拳，切磋开始。</small></div></div><div class="combat-actions">${skills.map(id=>`<button data-combat-skill="${id}">${MARTIAL_BY_ID[id]?.name||id}</button>`).join('')}<button data-combat-finish hidden>结束切磋</button></div></section>`;
-  const canvas=root.querySelector('[data-combat-canvas]'),message=root.querySelector('[data-combat-message]'),finishButton=root.querySelector('[data-combat-finish]'),skillButtons=[...root.querySelectorAll('[data-combat-skill]')];
-  const updateHud=()=>{root.querySelector('[data-player-hp]').textContent=hpText(battle,'player');root.querySelector('[data-enemy-hp]').textContent=hpText(battle,'instructor');skillButtons.forEach(x=>x.disabled=busy||boutFinished);};
-  const close=()=>onBack();
-  root.querySelector('[data-combat-back]').onclick=close;
-  finishButton.onclick=()=>{const next=advanceSessionHours(session,1);onFinish(next);};
-
-  async function animateTurn(attackerId,defenderId,martialId){
-    const before=battle,out=executeAction(battle,{attackerId,defenderId,martialId});battle=out.state;
-    await playCombatAnimation({canvas,beforeState:before,afterState:battle,events:out.events,martialId});
-    updateHud();return out;
-  }
-  async function playerTurn(martialId){
-    if(busy||boutFinished)return;busy=true;updateHud();message.textContent=`你使出${MARTIAL_BY_ID[martialId]?.name||martialId}。`;
-    const playerOut=await animateTurn('player','instructor',martialId);
-    if(battle.finished){boutFinished=true;busy=false;message.textContent='教习认输。切磋结束。';finishButton.hidden=false;updateHud();return;}
-    message.textContent=playerOut.result?.hit?'教习退开半步，随即还手。':'教习避开此招，立即还手。';
-    const enemyOut=await animateTurn('instructor','player','martial_basic_fist');
-    busy=false;
-    if(battle.finished){boutFinished=true;message.textContent='你被教习制住。切磋结束。';finishButton.hidden=false;}else message.textContent=enemyOut.result?.hit?'你受了一拳，重新站稳。':'你避开了教习的反击。';
-    updateHud();
-  }
-  skillButtons.forEach(button=>button.onclick=()=>playerTurn(button.dataset.combatSkill));
-  updateHud();
+export function mountCombatPrototype(root,session,{onBack,onFinish,encounterId=null}){
+  let workingSession=session;const character=workingSession.character,skills=supportedKnown(character),encounter=encounterId?MING_ENCOUNTER_BY_ID[encounterId]:null,isEncounter=Boolean(encounter),validPlace=isEncounter?character.world.location===encounter.locationId&&character.world.scene===encounter.sceneId:character.world.location==='ming_luoyang'&&character.world.scene==='ming_luoyang_martial_hall';
+  if(!validPlace){root.innerHTML='<div class="combat-empty"><h2>这里不能开战</h2><p>必须亲自抵达对应的演武场或固定实战点。</p><button data-combat-back>返回</button></div>';root.querySelector('[data-combat-back]').onclick=onBack;return;}
+  if(!skills.length){root.innerHTML='<div class="combat-empty"><h2>还没有可用于实战的武功</h2><p>先学一门当前战斗引擎支持的拳法、剑法或刀法。</p><button data-combat-back>返回</button></div>';root.querySelector('[data-combat-back]').onclick=onBack;return;}
+  const enemyId=isEncounter?'enemy':'instructor',enemy=isEncounter?encounterCombatant(encounter):instructorCombatant();let battle=createBattleState({left:playerCombatant(character),right:enemy}),busy=false,boutFinished=false,usedMartials=[],lastPractice='';
+  root.innerHTML=`<section class="combat-shell"><div class="combat-heading"><div><p class="eyebrow">${isEncounter?'江湖实战':'演武切磋'}</p><h2>${isEncounter?encounter.name:'洛阳武馆 · 演武切磋'}</h2><p>${isEncounter?'每一场实战只消耗 1 小时。你每次真正出手都会让所用武功获得实战熟练，命中收益更高。':'木制刀剑切磋。每次出手同样会积累实战熟练。'}</p></div><button data-combat-back>退出</button></div><canvas class="combat-canvas" data-combat-canvas></canvas><div class="combat-hud"><div><b>你：<span data-player-hp></span></b><small>每次出手都会成长；约 3–4 次有效命中≈闭门修炼一天。</small></div><div><b>${enemy.name}：<span data-enemy-hp></span></b><small data-combat-message>双方对峙，战斗开始。</small><small data-practice-message></small></div></div><div class="combat-actions">${skills.map(id=>`<button data-combat-skill="${id}">${MARTIAL_BY_ID[id]?.name||id}</button>`).join('')}<button data-combat-finish hidden>结算本场 · 1小时</button></div></section>`;
+  const canvas=root.querySelector('[data-combat-canvas]'),message=root.querySelector('[data-combat-message]'),practiceMessage=root.querySelector('[data-practice-message]'),finishButton=root.querySelector('[data-combat-finish]'),skillButtons=[...root.querySelectorAll('[data-combat-skill]')];
+  const updateHud=()=>{root.querySelector('[data-player-hp]').textContent=hpText(battle,'player');root.querySelector('[data-enemy-hp]').textContent=hpText(battle,enemyId);practiceMessage.textContent=lastPractice;skillButtons.forEach(x=>x.disabled=busy||boutFinished);};
+  root.querySelector('[data-combat-back]').onclick=()=>onBack();
+  finishButton.onclick=()=>{const won=battle.winnerId==='player';let nextCharacter=applyBattleInsight(workingSession.character,usedMartials);nextCharacter=applyBattleProgress(nextCharacter,{difficulty:isEncounter?encounter.difficulty:1,win:won});let metamorphosed=false;if(!won){const out=applyLossGrowth(nextCharacter);nextCharacter=out.character;metamorphosed=out.triggered;}if(won&&isEncounter){nextCharacter={...nextCharacter,wallet:{...nextCharacter.wallet,silver:(nextCharacter.wallet?.silver||0)+(encounter.reward?.silver||0)}};}workingSession={...workingSession,character:nextCharacter};const next=advanceSessionHours(workingSession,1);onFinish(next,{won,encounterId:encounter?.id||null,metamorphosed});};
+  async function animateTurn(attackerId,defenderId,martialId){const before=battle,out=executeAction(battle,{attackerId,defenderId,martialId});battle=out.state;await playCombatAnimation({canvas,beforeState:before,afterState:battle,events:out.events,martialId});if(attackerId==='player'&&out.result?.ok){const practice=practiceMartialInCombat(workingSession.character,martialId,{hit:Boolean(out.result.hit)});workingSession={...workingSession,character:practice.character};usedMartials.push(martialId);lastPractice=`${MARTIAL_BY_ID[martialId]?.name||martialId}：实战熟练 +${practice.result.masteryGain}，理解 +${practice.result.understandingGain}`;}updateHud();return out;}
+  async function playerTurn(martialId){if(busy||boutFinished)return;busy=true;updateHud();message.textContent=`你使出${MARTIAL_BY_ID[martialId]?.name||martialId}。`;const playerOut=await animateTurn('player',enemyId,martialId);if(battle.finished){boutFinished=true;busy=false;message.textContent=`${enemy.name}已无法再战。`;finishButton.hidden=false;updateHud();return;}message.textContent=playerOut.result?.hit?`${enemy.name}受击后立即还手。`:`${enemy.name}避开此招，立即还手。`;const enemyOut=await animateTurn(enemyId,'player','martial_basic_fist');busy=false;if(battle.finished){boutFinished=true;message.textContent='你被对手压制，本场结束。';finishButton.hidden=false;}else message.textContent=enemyOut.result?.hit?'你受击后重新站稳。':'你避开了对手的反击。';updateHud();}
+  skillButtons.forEach(button=>button.onclick=()=>playerTurn(button.dataset.combatSkill));updateHud();
 }
