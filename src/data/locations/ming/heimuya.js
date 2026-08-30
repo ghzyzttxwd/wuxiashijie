@@ -1,0 +1,1 @@
+export const MING_HEIMUYA={id:'ming_heimuya',countryId:'ming',name:'黑木崖',kind:'forbidden-sect',risk:8,summary:'日月神教总坛。普通江湖人擅闯此地，死亡风险极高。',scenes:[{id:'ming_heimuya_foothill',name:'黑木崖山脚'},{id:'ming_heimuya_path',name:'险峻山道'},{id:'ming_heimuya_gate',name:'日月神教总坛入口'},{id:'ming_heimuya_inner',name:'黑木崖内坛'}]};
