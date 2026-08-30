@@ -1,2 +1,6 @@
-// 武学纯数据入口。后续按体系/作品拆分，绝不把几百门武功塞进一个文件。
-export const MARTIAL_DATA=[];
+import {BASIC_FIST,BASIC_SWORD,BASIC_SABER}from'./common/basic.js';
+import {HUASHAN_BASIC_SWORD,ZIXIA_GONG}from'./ming/huashan.js';
+import {SHAOLIN_VAJRA_PALM}from'./ming/shaolin.js';
+
+export const MARTIAL_DATA=[BASIC_FIST,BASIC_SWORD,BASIC_SABER,HUASHAN_BASIC_SWORD,ZIXIA_GONG,SHAOLIN_VAJRA_PALM];
+export const MARTIAL_BY_ID=Object.fromEntries(MARTIAL_DATA.map(x=>[x.id,x]));
