@@ -1,0 +1,4 @@
+const A=(id,name)=>({id,name});
+export const ORIGIN_ASSETS=[
+A('asset_black_market_contacts','黑市与底层人脉'),A('asset_trade_contacts','商路与商贾关系'),A('asset_servants','家仆'),A('asset_escort_network','镖局江湖关系'),A('asset_martial_school','自家武馆资源'),A('asset_hidden_family_legacy','家族隐藏遗产线索'),A('asset_family_manor','家族庄园'),A('asset_clan_guards','家族护卫'),A('asset_sect_access','大型门派传承入口'),A('asset_high_sect_status','门派高层身份'),A('asset_military_network','军方关系'),A('asset_official_network','官府与朝堂关系'),A('asset_guard_retinue','护卫随从'),A('asset_marquis_manor','侯府'),A('asset_house_troops','家兵'),A('asset_elite_guards','高级护卫'),A('asset_prince_manor','王府'),A('asset_senior_instructor','高级武师'),A('asset_imperial_clan_status','皇室宗亲身份'),A('asset_imperial_connections','皇室关系'),A('asset_imperial_core_status','皇室核心身份'),A('asset_palace_resources','宫廷资源')];
+export const ORIGIN_ASSET_BY_ID=Object.fromEntries(ORIGIN_ASSETS.map(x=>[x.id,x]));
