@@ -1,5 +1,5 @@
 import {hasMartial}from'../state.js';import{learnMartialSession,advanceSessionHours}from'../../core/sessionFactory.js';
 export const LUOYANG_BASIC_LESSON_COST=12;
-export const LUOYANG_BASIC_MARTIAL_IDS=['martial_basic_fist','martial_basic_sword','martial_basic_saber'];
+export const LUOYANG_BASIC_MARTIAL_IDS=['martial_basic_fist','martial_basic_sword','martial_basic_saber','martial_basic_lightness','martial_basic_breathing'];
 export function canUseLuoyangHall(session){return session?.character?.world?.location==='ming_luoyang'&&session.character.world.scene==='ming_luoyang_martial_hall';}
 export function learnAtLuoyangHall(session,martialId){if(!canUseLuoyangHall(session))throw Error('not_at_luoyang_hall');if(!LUOYANG_BASIC_MARTIAL_IDS.includes(martialId))throw Error('martial_not_taught_here');if(hasMartial(session.character,martialId))throw Error('already_learned');if((session.character.wallet?.silver??0)<LUOYANG_BASIC_LESSON_COST)throw Error('not_enough_silver');let next=learnMartialSession(session,martialId,{commonAccess:true});next={...next,character:{...next.character,wallet:{...next.character.wallet,silver:next.character.wallet.silver-LUOYANG_BASIC_LESSON_COST}}};return advanceSessionHours(next,1);}
