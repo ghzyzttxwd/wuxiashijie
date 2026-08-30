@@ -1,0 +1,1 @@
+export const MING_MEIZHUANG={id:'ming_meizhuang',countryId:'ming',name:'西湖梅庄',kind:'manor',risk:4,summary:'表面清幽，地下却囚着足以改写日月神教格局的人。',scenes:[{id:'ming_meizhuang_gate',name:'梅庄大门'},{id:'ming_meizhuang_hall',name:'梅庄正厅'},{id:'ming_meizhuang_cellar',name:'地下秘道'},{id:'ming_meizhuang_prison',name:'地牢深处'}]};
