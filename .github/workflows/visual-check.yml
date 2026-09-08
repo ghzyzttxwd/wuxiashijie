@@ -24,6 +24,16 @@ jobs:
           browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$browser"
           echo "path=$browser" >> "$GITHUB_OUTPUT"
+      - name: Cache trusted 3D fighters locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .visual-assets
+          base='https://huggingface.co/datasets/EntVista/metrixel-rigged-characters/resolve/main/data'
+          curl -fL --retry 3 --connect-timeout 20 "$base/AncientGeneral.glb" -o .visual-assets/AncientGeneral.glb
+          curl -fL --retry 3 --connect-timeout 20 "$base/AncientKing.glb" -o .visual-assets/AncientKing.glb
+          test "$(stat -c%s .visual-assets/AncientGeneral.glb)" -gt 1000000
+          test "$(stat -c%s .visual-assets/AncientKing.glb)" -gt 1000000
       - name: Start local static server
         shell: bash
         run: |
@@ -66,7 +76,7 @@ jobs:
             --headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader \
             --hide-scrollbars --window-size=1440,900 --virtual-time-budget=60000 \
             --dump-dom --screenshot=artifacts/combat-thirdparty.png \
-            'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact&art=metrixel' \
+            'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact&art=metrixel&assetBase=/.visual-assets' \
             > artifacts/combat-thirdparty-dom.html
           test -s artifacts/combat-thirdparty.png
           grep -o 'data-third-party-art="[^"]*"' artifacts/combat-thirdparty-dom.html || true
