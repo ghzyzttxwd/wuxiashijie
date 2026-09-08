@@ -3,59 +3,138 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>九州武侠 · 开源人物战斗样板</title>
+<title>九州武侠 · 非像素战斗样板</title>
 <style>
-:root{color-scheme:dark;font-family:"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif;background:#080b0f;color:#edf0f3}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 15%,#27313c 0,#111820 38%,#07090c 75%);display:flex;justify-content:center}
-main{width:min(1100px,100%);padding:18px 12px 30px}.top{display:flex;gap:12px;align-items:end;justify-content:space-between;margin:0 auto 10px;max-width:1000px}.top h1{font:700 clamp(20px,4vw,30px) "Noto Serif CJK SC","Songti SC",serif;margin:0}.top p{margin:4px 0 0;color:#aeb7c1;font-size:13px}.badge{white-space:nowrap;border:1px solid #72809166;background:#111820aa;border-radius:999px;padding:6px 10px;font-size:12px;color:#d7dde4}
-.stage{position:relative;margin:auto;max-width:1000px;aspect-ratio:16/9;border:1px solid #9ba6b322;border-radius:16px;overflow:hidden;box-shadow:0 22px 80px #0009;background:#080b0f}.stage:after{content:"";pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 90px #000b}
-canvas{display:block;width:100%;height:100%}.controls{display:flex;justify-content:center;gap:10px;margin:12px 0}.controls button{border:1px solid #8793a044;background:#151c24;color:#f1f3f5;border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}.controls button:active{transform:translateY(1px)}
-.note{max-width:1000px;margin:12px auto 0;padding:12px 14px;border-left:3px solid #8996a4;background:#111820aa;color:#bfc7cf;font-size:13px;line-height:1.65;border-radius:0 9px 9px 0}.note strong{color:#f3f5f7}.note a{color:#dbe6f0}.error{color:#ffb1b1}
+:root{color-scheme:dark;font-family:"Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;background:#090c10;color:#eef2f5}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#27323d 0,#111820 42%,#080a0d 78%);display:flex;justify-content:center}
+main{width:min(1120px,100%);padding:16px 10px 28px}.head{display:flex;align-items:end;justify-content:space-between;gap:12px;max-width:1040px;margin:0 auto 10px}.head h1{margin:0;font:800 clamp(20px,4vw,31px) "STKaiti","KaiTi","Noto Serif CJK SC",serif;letter-spacing:.05em}.head p{margin:4px 0 0;color:#aeb8c2;font-size:13px}.pill{white-space:nowrap;border:1px solid #c7d0da32;border-radius:999px;padding:6px 10px;background:#151c24b8;color:#e5ebf0;font-size:12px}
+.stage{max-width:1040px;aspect-ratio:16/9;margin:auto;position:relative;overflow:hidden;border:1px solid #c3ccd52b;border-radius:17px;background:#121820;box-shadow:0 30px 90px #000b}.stage svg{display:block;width:100%;height:100%;touch-action:manipulation}.stage:after{content:"";pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 90px #000c}
+.controls{display:flex;justify-content:center;gap:9px;margin:12px auto}.controls button{border:1px solid #8e9aa747;background:#151d26;color:#f1f4f6;border-radius:10px;padding:9px 17px;font:inherit;cursor:pointer}.controls button:active{transform:translateY(1px)}
+.note{max-width:1040px;margin:0 auto;padding:11px 13px;background:#111820c7;border-left:3px solid #8494a4;border-radius:0 10px 10px 0;color:#bbc5ce;font-size:13px;line-height:1.65}.note strong{color:#f1f4f6}.good{color:#d5e6d4}
+.hpText{font:700 16px "Microsoft YaHei",sans-serif;fill:#eff3f5;text-shadow:0 2px 4px #000}.skillText{font:800 25px "STKaiti","KaiTi",serif;fill:#fff6df;paint-order:stroke;stroke:#2b1c0d;stroke-width:4px}.smallText{font:600 12px "Microsoft YaHei",sans-serif;fill:#d6dde4}
 </style>
 </head>
 <body><main>
-<div class="top"><div><h1>九州武侠 · 开源人物战斗样板</h1><p>保留原先“位移 → 出招 → 命中 → 击退 → 恢复”的表现思路，只把几何人物换成真正 Sprite 动画。</p></div><div class="badge">CC0 素材试接</div></div>
-<div class="stage"><canvas id="battle" width="1000" height="562"></canvas></div>
-<div class="controls"><button id="replay">重播一轮</button><button id="pause">暂停</button></div>
-<div class="note" id="note"><strong>素材：</strong>LuizMelo《Martial Hero / Martial Hero 2》，CC0，可商用。当前样板为了快速验证，图片从一个公开 GitHub 格斗项目的素材镜像读取；若路线确认，正式版本会把素材归档进项目资产目录，不长期依赖外链。<br><a href="https://luizmelo.itch.io/martial-hero" target="_blank" rel="noreferrer">Martial Hero 原始页面</a> · <a href="https://luizmelo.itch.io/martial-hero-2" target="_blank" rel="noreferrer">Martial Hero 2 原始页面</a></div>
+<div class="head"><div><h1>九州武侠 · 非像素战斗样板</h1><p>矢量人物 / 国风场景 / 位移 / 挥剑 / 残影 / 剑气 / 受击 / 击退 / 震屏</p></div><div class="pill">Vector Wuxia Prototype</div></div>
+<div class="stage">
+<svg id="scene" viewBox="0 0 1000 562" xmlns="http://www.w3.org/2000/svg" aria-label="武侠战斗演示">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#162431"/><stop offset=".55" stop-color="#293a42"/><stop offset="1" stop-color="#67746c"/></linearGradient>
+  <linearGradient id="robeL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#355c65"/><stop offset=".55" stop-color="#173b43"/><stop offset="1" stop-color="#0c242b"/></linearGradient>
+  <linearGradient id="robeR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4b3f56"/><stop offset=".55" stop-color="#282338"/><stop offset="1" stop-color="#171322"/></linearGradient>
+  <linearGradient id="blade" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b6cad3"/><stop offset=".45" stop-color="#ffffff"/><stop offset="1" stop-color="#86a7b5"/></linearGradient>
+  <radialGradient id="moon"><stop stop-color="#fff5d5"/><stop offset="1" stop-color="#d8d8c7"/></radialGradient>
+  <filter id="softGlow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="impactGlow"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".6"/></filter>
+</defs>
+
+<rect width="1000" height="562" fill="url(#sky)"/>
+<circle cx="817" cy="93" r="48" fill="url(#moon)" opacity=".82" filter="url(#softGlow)"/>
+<path d="M0 253L83 189l45 27 67-72 77 83 55-49 76 69 76-111 77 86 65-51 87 72 74-90 90 106 58-32v165H0z" fill="#18282b" opacity=".82"/>
+<path d="M0 303l105-71 65 39 90-70 86 66 78-30 88 67 88-59 79 59 87-42 88 53 76-21v115H0z" fill="#31413c" opacity=".72"/>
+<path d="M0 337c119-36 193-13 294-23 108-11 159-57 270-34 110 23 180-10 268 4 67 10 110 34 168 20v116H0z" fill="#798177" opacity=".38"/>
+<!-- bamboo silhouettes -->
+<g opacity=".5" fill="#101b1a" stroke="#101b1a" stroke-width="5">
+ <path d="M78 105l20 335M121 125l-8 315M901 117l-17 323M944 85l-26 355" fill="none"/>
+ <path d="M91 176c-28-20-48-18-65-9 30 7 49 15 67 28zM96 224c27-28 51-27 69-19-28 12-48 24-65 42zM113 266c-29-13-51-8-67 4 29 0 50 4 68 17zM889 181c27-27 51-26 69-18-28 11-48 23-65 41zM890 236c-29-16-51-13-68-2 29 3 50 10 67 26zM925 286c28-22 50-20 67-10-28 8-48 17-65 31z"/>
+</g>
+<rect y="422" width="1000" height="140" fill="#171b1b"/>
+<path d="M0 430c171-22 290 15 491-5 182-18 315-24 509 1v22H0z" fill="#5d6158"/>
+<path d="M0 451h1000" stroke="#8b8b7e" stroke-width="2" opacity=".34"/>
+<g opacity=".32" stroke="#d9d4c1" stroke-width="1"><path d="M70 449v113M190 449v113M310 449v113M430 449v113M550 449v113M670 449v113M790 449v113M910 449v113"/></g>
+
+<!-- UI -->
+<g transform="translate(35 28)"><text class="hpText" x="0" y="0">青衫剑客</text><rect x="0" y="13" width="355" height="18" rx="9" fill="#071014" stroke="#d8e2e833"/><rect id="hpL" x="3" y="16" width="349" height="12" rx="6" fill="#84a75e"/><text class="smallText" x="0" y="50">剑 · 身法 · 轻功</text></g>
+<g transform="translate(965 28)" text-anchor="end"><text class="hpText" x="0" y="0">玄衣刀客</text><rect x="-355" y="13" width="355" height="18" rx="9" fill="#071014" stroke="#d8e2e833"/><rect id="hpR" x="-352" y="16" width="349" height="12" rx="6" fill="#a2645b"/><text class="smallText" x="0" y="50">刀 · 爆发 · 反击</text></g>
+<text id="skillName" x="500" y="116" text-anchor="middle" class="skillText" opacity="0">流云十三式 · 断水</text>
+
+<!-- afterimages -->
+<g id="ghost1" opacity="0"></g><g id="ghost2" opacity="0"></g>
+
+<!-- LEFT FIGHTER -->
+<g id="left" transform="translate(245 418)" filter="url(#shadow)">
+ <ellipse cx="0" cy="17" rx="49" ry="10" fill="#000" opacity=".42"/>
+ <g id="leftBody">
+  <!-- rear sash / hair -->
+  <path d="M-14-111c-31 13-49 38-65 72 24-18 45-25 67-26z" fill="#161b1e"/>
+  <path d="M6-87c34 7 61 25 84 55-31-14-53-18-77-13z" fill="#d7dbd4" opacity=".72"/>
+  <!-- legs -->
+  <g id="leftLegBack" transform="rotate(3)"><path d="M-12-38l-15 46h23L8-36z" fill="#263b3e"/><path d="M-28 4l-5 13h35L-3 4z" fill="#101719"/></g>
+  <g id="leftLegFront" transform="rotate(-2)"><path d="M12-39L7 8h24L28-35z" fill="#345257"/><path d="M7 4l-2 13h38L31 4z" fill="#101719"/></g>
+  <!-- robe -->
+  <path d="M-43-79Q0-104 43-79l18 75Q2 18-60-4z" fill="url(#robeL)" stroke="#74929a" stroke-width="2"/>
+  <path d="M-4-87l9 82" stroke="#94a9aa" stroke-width="3" opacity=".55"/><path d="M-44-25Q2-11 52-25" fill="none" stroke="#ad8b51" stroke-width="7"/>
+  <!-- left arm -->
+  <g id="leftArmBack" transform-origin="-30px -69px"><path d="M-33-72q-31 8-42 39l17 8q11-20 35-26z" fill="#23454c" stroke="#66858b" stroke-width="2"/><circle cx="-63" cy="-27" r="7" fill="#e8c8ad"/></g>
+  <!-- head -->
+  <circle cx="0" cy="-118" r="26" fill="#e9c6aa" stroke="#5d4436" stroke-width="2"/>
+  <path d="M-27-122q5-34 32-34 27 3 28 35c-9-12-20-18-31-21-12 8-22 13-29 20z" fill="#171a1c"/>
+  <path d="M-2-151q20-22 35 2c-12-5-19-4-27 1z" fill="#171a1c"/>
+  <path d="M-11-119h7M7-119h7" stroke="#2f2522" stroke-width="2" stroke-linecap="round"/><path d="M-5-105q6 4 12 0" fill="none" stroke="#a16f62" stroke-width="2"/>
+  <!-- front arm + sword -->
+  <g id="leftArm" transform-origin="30px -68px">
+   <path d="M30-71q30 10 43 36l-15 10Q43-45 20-49z" fill="#2e5962" stroke="#73979f" stroke-width="2"/><circle cx="64" cy="-27" r="7" fill="#e8c8ad"/>
+   <g id="leftSword" transform="translate(63 -28) rotate(-18)"><rect x="-5" y="-5" width="30" height="8" rx="3" fill="#5d3f29"/><rect x="15" y="-9" width="8" height="16" rx="2" fill="#c59c54"/><path d="M22-2L133-7 144 0 132 7 22 3z" fill="url(#blade)" stroke="#dce8eb" stroke-width="1"/></g>
+  </g>
+ </g>
+</g>
+
+<!-- RIGHT FIGHTER -->
+<g id="right" transform="translate(755 418)" filter="url(#shadow)">
+ <ellipse cx="0" cy="17" rx="49" ry="10" fill="#000" opacity=".42"/>
+ <g id="rightBody">
+  <path d="M14-112c31 14 51 40 68 72-24-17-46-24-68-24z" fill="#111319"/>
+  <path d="M-8-86c-35 7-61 25-86 54 32-13 55-17 79-12z" fill="#68546d" opacity=".55"/>
+  <g id="rightLegBack"><path d="M-10-38l-14 46H0L8-36z" fill="#2c2638"/><path d="M-25 4l-6 13H4L0 4z" fill="#0d0d13"/></g>
+  <g id="rightLegFront"><path d="M13-39L7 8h24L29-35z" fill="#43384d"/><path d="M7 4l-2 13h38L31 4z" fill="#0d0d13"/></g>
+  <path d="M-44-78Q0-105 44-78l17 74Q0 18-61-4z" fill="url(#robeR)" stroke="#806f8c" stroke-width="2"/>
+  <path d="M2-87l-7 83" stroke="#a597aa" stroke-width="3" opacity=".45"/><path d="M-45-25Q0-10 52-25" fill="none" stroke="#8f6d50" stroke-width="7"/>
+  <g id="rightArmBack" transform-origin="-31px -68px"><path d="M-31-71q-30 9-43 37l16 10q13-22 36-27z" fill="#302a3d" stroke="#74667f" stroke-width="2"/><circle cx="-64" cy="-27" r="7" fill="#d7b69d"/></g>
+  <circle cx="0" cy="-118" r="26" fill="#d8b79d" stroke="#493832" stroke-width="2"/>
+  <path d="M-28-120q1-33 31-35 29 5 31 36c-11-11-20-17-31-20-12 7-22 13-31 19z" fill="#111219"/>
+  <path d="M-2-151q-18-21-34 3c12-5 20-3 27 1z" fill="#111219"/>
+  <path d="M-12-119h7M7-119h7" stroke="#271f20" stroke-width="2" stroke-linecap="round"/><path d="M-6-105q6 3 12 0" fill="none" stroke="#8d625b" stroke-width="2"/>
+  <g id="rightArm" transform-origin="30px -68px"><path d="M30-71q31 9 43 36l-16 10Q43-45 20-49z" fill="#40354c" stroke="#806f8c" stroke-width="2"/><circle cx="64" cy="-27" r="7" fill="#d7b69d"/>
+   <g id="rightBlade" transform="translate(64 -28) rotate(202)"><rect x="-5" y="-5" width="31" height="8" rx="3" fill="#4a3026"/><rect x="15" y="-9" width="8" height="16" rx="2" fill="#a77c4e"/><path d="M22-2L125-8 140 0 125 7 22 3z" fill="url(#blade)" stroke="#dce8eb" stroke-width="1"/></g>
+  </g>
+ </g>
+</g>
+
+<!-- FX -->
+<g id="fx" pointer-events="none">
+ <path id="slashArc" d="M390 335 Q520 210 650 350" fill="none" stroke="#eaf8ff" stroke-width="12" stroke-linecap="round" opacity="0" filter="url(#softGlow)"/>
+ <path id="slashArc2" d="M395 344 Q520 235 640 365" fill="none" stroke="#88d4e7" stroke-width="4" stroke-linecap="round" opacity="0"/>
+ <circle id="impact" cx="720" cy="340" r="18" fill="#fff" opacity="0" filter="url(#impactGlow)"/>
+ <g id="sparks" opacity="0" stroke="#d8f6ff" stroke-width="4" stroke-linecap="round"><path d="M720 340l-38-29M720 340l42-33M720 340l54 7M720 340l-25 46M720 340l31 41"/></g>
+</g>
+</svg>
+</div>
+<div class="controls"><button id="replay">重播</button><button id="pause">暂停</button></div>
+<div class="note"><strong>这版不是像素图。</strong> 人物改成可无限放大的矢量国风原型，先验证《金庸群侠传2》这类“卡通武侠人物 + 夸张招式表现”的方向。正式接入时，战斗逻辑、伤害数值和原有时间轴都不用推倒，只替换渲染层。<br><span class="good">下一步可以继续换成真正的高分辨率逐帧人物 / 骨骼动画素材。</span></div>
 <script>
-const canvas=document.querySelector('#battle'),ctx=canvas.getContext('2d');
-const replayBtn=document.querySelector('#replay'),pauseBtn=document.querySelector('#pause'),note=document.querySelector('#note');
-ctx.imageSmoothingEnabled=false;
-const ROOT='https://raw.githubusercontent.com/barrymun/fighting-game/main/src/assets/img/';
-const defs={
- left:{dir:'samurai-mack',face:'',label:'游侠·青锋',counts:{idle:8,run:8,attack:6,hit:4,death:6},files:{idle:'idle.png',run:'run.png',attack:'attack-1.png',hit:'take-hit-white-silhouette.png',death:'death.png'}},
- right:{dir:'kenji',face:'-flipped',label:'黑衣刀客',counts:{idle:4,run:8,attack:4,hit:3,death:7},files:{idle:'idle-flipped.png',run:'run-flipped.png',attack:'attack-1-flipped.png',hit:'take-hit-flipped.png',death:'death-flipped.png'}};
-const images=new Map();let loaded=0,failed=0;
-function urlFor(def,state){return ROOT+def.dir+'/'+def.files[state]}
-function loadAll(){for(const def of Object.values(defs)){for(const state of Object.keys(def.files)){const url=urlFor(def,state);if(images.has(url))continue;const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{loaded++;};img.onerror=()=>{failed++;note.classList.add('error');note.insertAdjacentHTML('beforeend','<br>有素材加载失败，样板将显示占位人物。');};img.src=url;images.set(url,img)}}}
-loadAll();
-function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}function easeOut(t){return 1-Math.pow(1-t,3)}function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
-function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
-function drawBackdrop(shakeX=0,shakeY=0){ctx.save();ctx.translate(shakeX,shakeY);const g=ctx.createLinearGradient(0,0,0,562);g.addColorStop(0,'#27313b');g.addColorStop(.48,'#111820');g.addColorStop(1,'#090b0e');ctx.fillStyle=g;ctx.fillRect(-20,-20,1040,602);
- const moon=ctx.createRadialGradient(760,92,4,760,92,80);moon.addColorStop(0,'rgba(241,243,238,.33)');moon.addColorStop(.35,'rgba(230,234,232,.12)');moon.addColorStop(1,'rgba(220,230,235,0)');ctx.fillStyle=moon;ctx.beginPath();ctx.arc(760,92,80,0,Math.PI*2);ctx.fill();ctx.fillStyle='#dce2df22';ctx.beginPath();ctx.arc(760,92,29,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#080b0ee8';ctx.beginPath();ctx.moveTo(-20,345);ctx.lineTo(110,190);ctx.lineTo(245,337);ctx.lineTo(395,160);ctx.lineTo(555,340);ctx.lineTo(690,218);ctx.lineTo(840,344);ctx.lineTo(1020,182);ctx.lineTo(1020,430);ctx.lineTo(-20,430);ctx.closePath();ctx.fill();
- ctx.fillStyle='#1b232bc4';ctx.beginPath();ctx.moveTo(-20,390);ctx.lineTo(155,275);ctx.lineTo(315,385);ctx.lineTo(505,250);ctx.lineTo(680,390);ctx.lineTo(860,292);ctx.lineTo(1020,370);ctx.lineTo(1020,455);ctx.lineTo(-20,455);ctx.closePath();ctx.fill();
- ctx.fillStyle='#14181d';ctx.fillRect(-20,430,1040,152);ctx.strokeStyle='#ffffff10';ctx.lineWidth=1;for(let y=448;y<575;y+=22){ctx.beginPath();ctx.moveTo(-20,y);ctx.lineTo(1020,y-15);ctx.stroke()}for(let x=50;x<1000;x+=110){ctx.beginPath();ctx.moveTo(x,430);ctx.lineTo(500+(x-500)*1.35,580);ctx.stroke()}
- ctx.strokeStyle='#bec7d022';ctx.lineWidth=3;for(const x of [70,930]){ctx.beginPath();ctx.moveTo(x,230);ctx.lineTo(x,438);ctx.stroke();ctx.beginPath();ctx.moveTo(x-25,258);ctx.lineTo(x+25,258);ctx.stroke()}ctx.restore()}
-function drawBar(x,y,w,value,label,align='left'){ctx.save();ctx.fillStyle='#0009';rr(x-4,y-4,w+8,23,9);ctx.fill();ctx.fillStyle='#ffffff18';rr(x,y,w,13,6);ctx.fill();const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#e7edf2');g.addColorStop(1,'#9eabb8');ctx.fillStyle=g;rr(x,y,w*clamp(value),13,6);ctx.fill();ctx.fillStyle='#f2f4f6';ctx.font='600 15px system-ui';ctx.textAlign=align;ctx.fillText(label,align==='right'?x+w:x,y-10);ctx.restore()}
-function placeholder(x,y,side,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=side==='left'?'#385c73':'#6a424b';ctx.fillRect(x-22,y-100,44,95);ctx.fillStyle='#d5b394';ctx.beginPath();ctx.arc(x,y-120,15,0,Math.PI*2);ctx.fill();ctx.restore()}
-function drawSprite(side,state,progress,x,y,opts={}){const def=defs[side],url=urlFor(def,state),img=images.get(url),count=def.counts[state],alpha=opts.alpha??1;if(!img||!img.complete||!img.naturalWidth){placeholder(x,y,side,alpha);return}const frameW=img.naturalWidth/count,frameH=img.naturalHeight;let idx=Math.floor(clamp(progress,0,.999999)*count);if(state==='idle'||state==='run')idx=Math.floor((progress%1)*count);if(state==='death'&&progress>=1)idx=count-1;const scale=2.18,dw=frameW*scale,dh=frameH*scale;ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=alpha;if(opts.flash){ctx.shadowBlur=28;ctx.shadowColor='#fff'};ctx.drawImage(img,idx*frameW,0,frameW,frameH,x-dw*.5,y-dh*.69,dw,dh);ctx.restore()}
-function slashFx(x,y,dir,p){ctx.save();ctx.globalCompositeOperation='screen';ctx.lineCap='round';const a=clamp(1-Math.abs(p-.62)*2.2);ctx.globalAlpha=a;const grad=ctx.createLinearGradient(x-dir*110,y+60,x+dir*130,y-85);grad.addColorStop(0,'rgba(170,215,255,0)');grad.addColorStop(.45,'rgba(210,235,255,.75)');grad.addColorStop(.68,'rgba(255,255,255,1)');grad.addColorStop(1,'rgba(170,215,255,0)');ctx.strokeStyle=grad;ctx.lineWidth=8;ctx.shadowBlur=26;ctx.shadowColor='#b9dcff';ctx.beginPath();ctx.arc(x-dir*5,y-22,105,-1.05,1.05);ctx.stroke();ctx.globalAlpha=a*.35;ctx.lineWidth=24;ctx.stroke();ctx.restore()}
-function impactFx(x,y,p){ctx.save();ctx.translate(x,y);ctx.globalCompositeOperation='screen';const a=1-clamp(p);for(let i=0;i<14;i++){const ang=i/14*Math.PI*2,rad=22+p*70;ctx.strokeStyle=`rgba(235,245,255,${a*(.25+(i%3)*.13)})`;ctx.lineWidth=2+(i%2);ctx.beginPath();ctx.moveTo(Math.cos(ang)*18,Math.sin(ang)*18);ctx.lineTo(Math.cos(ang)*rad,Math.sin(ang)*rad);ctx.stroke()}ctx.strokeStyle=`rgba(255,255,255,${a*.7})`;ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,18+p*55,0,Math.PI*2);ctx.stroke();ctx.restore()}
-let start=performance.now(),paused=false,pauseAt=0;const duration=5200;
-function phase(t){let L={state:'idle',p:(t/900)%1,x:225},R={state:'idle',p:(t/800)%1,x:775},fx=null,impact=null,hpR:1,hpL:1,shake=0,title=''};
- if(t<700){title='风起 · 对峙'}
- else if(t<1500){const p=(t-700)/800;L={state:'run',p:p*1.7,x:225+easeOut(p)*285};title='踏风近身'}
- else if(t<2200){const p=(t-1500)/700;L={state:'attack',p,x:510};fx={x:535,y:360,dir:1,p};title='青锋一式';if(p>.52){R={state:'hit',p:clamp((p-.52)/.48),x:775+easeOut(clamp((p-.52)/.48))*55};impact={x:737,y:340,p:clamp((p-.52)*2.1)};hpR=1-.38*easeOut(clamp((p-.52)*2.1));shake=(1-clamp(Math.abs(p-.58)*7))*7}}
- else if(t<3000){const p=(t-2200)/800;L={state:'run',p:p*1.2,x:510-easeInOut(p)*285};R={state:'hit',p:1,x:830};hpR=.62;title='击退'}
- else if(t<3700){const p=(t-3000)/700;L={state:'idle',p:p,x:225};R={state:'run',p:p*1.6,x:830-easeOut(p)*300};hpR=.62;title='反攻'}
- else if(t<4400){const p=(t-3700)/700;R={state:'attack',p,x:530};L={state:p>.52?'hit':'idle',p:p>.52?clamp((p-.52)/.48):p,x:225-(p>.52?easeOut(clamp((p-.52)/.48))*45:0)};hpR=.62;hpL=1-(p>.52?.27*easeOut(clamp((p-.52)*2.1)):0);fx={x:505,y:360,dir:-1,p};if(p>.52)impact={x:266,y:342,p:clamp((p-.52)*2.1)};shake=(1-clamp(Math.abs(p-.58)*7))*6;title='回刀 · 破势'}
- else{const p=(t-4400)/800;L={state:'idle',p:p,x:180};R={state:'idle',p:p,x:530+easeInOut(p)*245};hpR=.62;hpL=.73;title='再战'}return{L,R,fx,impact,hpR,hpL,shake,title}}
-function render(now){if(paused){requestAnimationFrame(render);return}const t=(now-start)%duration,s=phase(t),sx=s.shake?Math.sin(now*.095)*s.shake:0,sy=s.shake?Math.cos(now*.12)*s.shake*.45:0;ctx.clearRect(0,0,1000,562);drawBackdrop(sx,sy);ctx.save();ctx.translate(sx,sy);
- // afterimages during fast approach
- if((s.L.state==='run'&&s.L.x>300)){for(let i=1;i<=3;i++)drawSprite('left','run',(s.L.p-i*.08+1)%1,s.L.x-i*34,430,{alpha:.12/i})}if((s.R.state==='run'&&s.R.x<720)){for(let i=1;i<=3;i++)drawSprite('right','run',(s.R.p-i*.08+1)%1,s.R.x+i*34,430,{alpha:.12/i})}
- drawSprite('left',s.L.state,s.L.p,s.L.x,430,{flash:s.L.state==='hit'});drawSprite('right',s.R.state,s.R.p,s.R.x,430,{flash:s.R.state==='hit'});if(s.fx)slashFx(s.fx.x,s.fx.y,s.fx.dir,s.fx.p);if(s.impact)impactFx(s.impact.x,s.impact.y,s.impact.p);ctx.restore();drawBar(34,34,320,s.hpL,defs.left.label);drawBar(646,34,320,s.hpR,defs.right.label,'right');ctx.save();ctx.textAlign='center';ctx.font='700 27px "Noto Serif CJK SC","Songti SC",serif';ctx.fillStyle='#f0f3f5';ctx.shadowBlur=15;ctx.shadowColor='#000';ctx.fillText(s.title,500,82);ctx.font='12px system-ui';ctx.fillStyle='#ffffff70';ctx.fillText('OPEN ASSET COMBAT PROTOTYPE',500,105);ctx.restore();requestAnimationFrame(render)}
-requestAnimationFrame(render);
-replayBtn.onclick=()=>{start=performance.now();if(paused){paused=false;pauseBtn.textContent='暂停'}};pauseBtn.onclick=()=>{if(!paused){paused=true;pauseAt=performance.now();pauseBtn.textContent='继续'}else{start+=performance.now()-pauseAt;paused=false;pauseBtn.textContent='暂停'}};
-</script></main></body></html>
+const $=s=>document.querySelector(s);
+const scene=$('#scene'),left=$('#left'),right=$('#right'),leftBody=$('#leftBody'),rightBody=$('#rightBody'),leftArm=$('#leftArm'),rightArm=$('#rightArm'),leftSword=$('#leftSword'),rightBlade=$('#rightBlade'),arc=$('#slashArc'),arc2=$('#slashArc2'),impact=$('#impact'),sparks=$('#sparks'),skill=$('#skillName'),hpR=$('#hpR');
+let start=performance.now(),paused=false,pauseAt=0,raf=0;
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));const ease=t=>1-Math.pow(1-clamp(t),3);const inout=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function setT(el,x,y,r=0,s=1){el.setAttribute('transform',`translate(${x} ${y}) rotate(${r}) scale(${s})`)}
+function reset(){start=performance.now();hpR.setAttribute('width','349');skill.setAttribute('opacity','0');arc.setAttribute('opacity','0');arc2.setAttribute('opacity','0');impact.setAttribute('opacity','0');sparks.setAttribute('opacity','0');scene.style.transform='';}
+function frame(now){
+ if(paused){raf=requestAnimationFrame(frame);return}
+ let t=(now-start)%7000;
+ let lx=245,ly=418,rx=755,ry=418,lr=0,rr=0,armL=0,armR=0,bladeL=-18,bladeR=202;
+ // breathing idle
+ const breathe=Math.sin(t/190)*1.6;ly+=breathe;ry-=breathe*.7;
+ if(t>900&&t<2400){const p=ease((t-900)/1500);lx=245+310*p;ly-=12*Math.sin(Math.PI*p);lr=5*Math.sin(Math.PI*p);}
+ if(t>=2400&&t<3200){const p=clamp((t-2400)/800);lx=555+22*Math.sin(Math.PI*p);armL=-65*ease(p);bladeL=-18-98*ease(p);lr=10*Math.sin(Math.PI*p);skill.setAttribute('opacity',String(Math.sin(Math.PI*p)*.95));const a=clamp((p-.15)/.55);arc.setAttribute('opacity',String(Math.sin(Math.PI*a)*.95));arc2.setAttribute('opacity',String(Math.sin(Math.PI*a)*.8));arc.setAttribute('stroke-width',String(8+10*Math.sin(Math.PI*a)));if(p>.48&&p<.82){const q=(p-.48)/.34;impact.setAttribute('opacity',String(Math.sin(Math.PI*q)));sparks.setAttribute('opacity',String(Math.sin(Math.PI*q)));rx=755+76*ease(q);rr=18*Math.sin(Math.PI*q);hpR.setAttribute('width',String(349-(130*ease(q))));scene.style.transform=`translate(${(Math.random()-.5)*7}px,${(Math.random()-.5)*5}px) scale(1.008)`;}else scene.style.transform='';}
+ if(t>=3200&&t<4450){const p=inout((t-3200)/1250);lx=577-332*p;rx=831-76*p;lr=-4*(1-p);rr=10*(1-p);skill.setAttribute('opacity','0');arc.setAttribute('opacity','0');arc2.setAttribute('opacity','0');impact.setAttribute('opacity','0');sparks.setAttribute('opacity','0');scene.style.transform='';}
+ if(t>=4450&&t<5700){const p=ease((t-4450)/1250);rx=755-300*p;ry-=8*Math.sin(Math.PI*p);rr=-5*Math.sin(Math.PI*p);}
+ if(t>=5700&&t<6450){const p=clamp((t-5700)/750);rx=455-18*Math.sin(Math.PI*p);armR=65*ease(p);bladeR=202+95*ease(p);rr=-9*Math.sin(Math.PI*p);if(p>.5){const q=clamp((p-.5)/.32);lx=245-55*ease(q);lr=-15*Math.sin(Math.PI*q);scene.style.transform=`translate(${(Math.random()-.5)*5}px,${(Math.random()-.5)*4}px)`;}}
+ if(t>=6450){scene.style.transform='';}
+ setT(left,lx,ly,lr);setT(right,rx,ry,rr);leftArm.setAttribute('transform',`rotate(${armL} 30 -68)`);rightArm.setAttribute('transform',`rotate(${armR} 30 -68)`);leftSword.setAttribute('transform',`translate(63 -28) rotate(${bladeL})`);rightBlade.setAttribute('transform',`translate(64 -28) rotate(${bladeR})`);
+ raf=requestAnimationFrame(frame);
+}
+$('#replay').onclick=reset;$('#pause').onclick=()=>{paused=!paused;$('#pause').textContent=paused?'继续':'暂停';if(!paused){start+=performance.now()-pauseAt}else pauseAt=performance.now()};
+reset();raf=requestAnimationFrame(frame);
+</script>
+</main></body></html>
