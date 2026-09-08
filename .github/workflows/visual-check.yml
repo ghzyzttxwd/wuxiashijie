@@ -69,11 +69,14 @@ jobs:
             'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact&art=metrixel' \
             > artifacts/combat-thirdparty-dom.html
           test -s artifacts/combat-thirdparty.png
+          grep -o 'data-third-party-art="[^"]*"' artifacts/combat-thirdparty-dom.html || true
+          grep -o 'data-visual-ready="[^"]*"' artifacts/combat-thirdparty-dom.html || true
           grep -q 'data-third-party-art="ready"' artifacts/combat-thirdparty-dom.html
           grep -q 'data-visual-ready="impact"' artifacts/combat-thirdparty-dom.html
-      - name: Upload visual regression screenshots
+      - name: Upload visual diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: visual-regression
-          path: artifacts/*.png
+          path: artifacts/*
           if-no-files-found: error
