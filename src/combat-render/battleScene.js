@@ -3,6 +3,7 @@ import {compileAnimationTimeline,activeClipAt,clipProgress} from './animationTim
 import {createCamera,kickCamera,updateCamera} from './camera.js';
 import {createParticleSystem,spawnImpact,updateParticles} from './particles.js';
 import {getFxProfile} from './skillFx.js';
+import {FIGHTER_VISUAL_STATES,applyVisualState,visualStatesForEvent} from './fighterVisualState.js';
 
 const easeOut=t=>1-Math.pow(1-t,3);
 const easeInOut=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
@@ -11,7 +12,7 @@ function combatantsBySide(state){
   const list=Object.values(state.combatants);return{left:list.find(x=>x.side==='left')||list[0],right:list.find(x=>x.side==='right')||list[1]};
 }
 
-function basePose(combatant,x,y,side){return{id:combatant.id,name:combatant.name,x,y,side,lean:0,flash:0,weapon:null,defeated:combatant.hp<=0};}
+function basePose(combatant,x,y,side){return{id:combatant.id,name:combatant.name,x,y,side,lean:0,flash:0,weapon:null,defeated:combatant.hp<=0,visualState:FIGHTER_VISUAL_STATES.IDLE,visualProgress:0};}
 function weaponFor(martialId){return martialId.includes('sword')?'sword':martialId.includes('saber')?'saber':null;}
 function contactGap(fx){return fx.motion==='charge-palm'?105:fx.motion==='heavy-slash'?124:fx.motion==='dash-slash'?116:112;}
 function afterimageSet(attacker,dir,intensity=1){
@@ -19,8 +20,8 @@ function afterimageSet(attacker,dir,intensity=1){
 }
 function dustSet(x,y,dir,power=1){return[{x:x-dir*18,y:y+57,rx:30*power,ry:7,alpha:.18},{x:x-dir*48,y:y+59,rx:18*power,ry:5,alpha:.1}];}
 
-export function playCombatAnimation({canvas,beforeState,afterState,events,martialId,freezeAt=null}){
-  const renderer=new CombatRenderer(canvas),timeline=compileAnimationTimeline(events),camera=createCamera(),particles=createParticleSystem(),before=combatantsBySide(beforeState),after=combatantsBySide(afterState),fx=getFxProfile(martialId)||{},triggered=new Set();
+export function playCombatAnimation({canvas,beforeState,afterState,events,martialId,freezeAt=null,fighterVisualProvider=null}){
+  const renderer=new CombatRenderer(canvas,{fighterVisualProvider}),timeline=compileAnimationTimeline(events),camera=createCamera(),particles=createParticleSystem(),before=combatantsBySide(beforeState),after=combatantsBySide(afterState),fx=getFxProfile(martialId)||{},triggered=new Set();
   const leftBase={x:165,y:renderer.height*.78},rightBase={x:renderer.width-165,y:renderer.height*.78};
   const baseDistance=Math.abs(rightBase.x-leftBase.x),travel=Math.max(150,baseDistance-contactGap(fx));
   const attackerId=events.find(x=>x.actorId)?.actorId,targetId=events.find(x=>x.targetId)?.targetId;
@@ -34,6 +35,7 @@ export function playCombatAnimation({canvas,beforeState,afterState,events,martia
       left.weapon=left.id===attackerId?weaponFor(martialId):null;right.weapon=right.id===attackerId?weaponFor(martialId):null;
       const attacker=left.id===attackerId?left:right,target=left.id===targetId?left:right,dir=attacker.side;
       if(event){
+        const visual=visualStatesForEvent(event.type,p);applyVisualState(attacker,visual.actor);applyVisualState(target,visual.target);
         if(['action_start','approach','hit','miss'].includes(event.type))title=events.find(x=>x.type==='action_start')?.martialName||'';
         if(event.type==='action_start'){
           attacker.lean=-dir*(fx.motion==='charge-palm'?.12:.09);attacker.y+=4*Math.sin(Math.PI*p);dust=dustSet(attacker.x,attacker.y,dir,.7);
