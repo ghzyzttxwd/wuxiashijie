@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>九州武侠 · 开源人物战斗样板</title>
+<style>
+:root{color-scheme:dark;font-family:"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif;background:#080b0f;color:#edf0f3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 15%,#27313c 0,#111820 38%,#07090c 75%);display:flex;justify-content:center}
+main{width:min(1100px,100%);padding:18px 12px 30px}.top{display:flex;gap:12px;align-items:end;justify-content:space-between;margin:0 auto 10px;max-width:1000px}.top h1{font:700 clamp(20px,4vw,30px) "Noto Serif CJK SC","Songti SC",serif;margin:0}.top p{margin:4px 0 0;color:#aeb7c1;font-size:13px}.badge{white-space:nowrap;border:1px solid #72809166;background:#111820aa;border-radius:999px;padding:6px 10px;font-size:12px;color:#d7dde4}
+.stage{position:relative;margin:auto;max-width:1000px;aspect-ratio:16/9;border:1px solid #9ba6b322;border-radius:16px;overflow:hidden;box-shadow:0 22px 80px #0009;background:#080b0f}.stage:after{content:"";pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 90px #000b}
+canvas{display:block;width:100%;height:100%}.controls{display:flex;justify-content:center;gap:10px;margin:12px 0}.controls button{border:1px solid #8793a044;background:#151c24;color:#f1f3f5;border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}.controls button:active{transform:translateY(1px)}
+.note{max-width:1000px;margin:12px auto 0;padding:12px 14px;border-left:3px solid #8996a4;background:#111820aa;color:#bfc7cf;font-size:13px;line-height:1.65;border-radius:0 9px 9px 0}.note strong{color:#f3f5f7}.note a{color:#dbe6f0}.error{color:#ffb1b1}
+</style>
+</head>
+<body><main>
+<div class="top"><div><h1>九州武侠 · 开源人物战斗样板</h1><p>保留原先“位移 → 出招 → 命中 → 击退 → 恢复”的表现思路，只把几何人物换成真正 Sprite 动画。</p></div><div class="badge">CC0 素材试接</div></div>
+<div class="stage"><canvas id="battle" width="1000" height="562"></canvas></div>
+<div class="controls"><button id="replay">重播一轮</button><button id="pause">暂停</button></div>
+<div class="note" id="note"><strong>素材：</strong>LuizMelo《Martial Hero / Martial Hero 2》，CC0，可商用。当前样板为了快速验证，图片从一个公开 GitHub 格斗项目的素材镜像读取；若路线确认，正式版本会把素材归档进项目资产目录，不长期依赖外链。<br><a href="https://luizmelo.itch.io/martial-hero" target="_blank" rel="noreferrer">Martial Hero 原始页面</a> · <a href="https://luizmelo.itch.io/martial-hero-2" target="_blank" rel="noreferrer">Martial Hero 2 原始页面</a></div>
+<script>
+const canvas=document.querySelector('#battle'),ctx=canvas.getContext('2d');
+const replayBtn=document.querySelector('#replay'),pauseBtn=document.querySelector('#pause'),note=document.querySelector('#note');
+ctx.imageSmoothingEnabled=false;
+const ROOT='https://raw.githubusercontent.com/barrymun/fighting-game/main/src/assets/img/';
+const defs={
+ left:{dir:'samurai-mack',face:'',label:'游侠·青锋',counts:{idle:8,run:8,attack:6,hit:4,death:6},files:{idle:'idle.png',run:'run.png',attack:'attack-1.png',hit:'take-hit-white-silhouette.png',death:'death.png'}},
+ right:{dir:'kenji',face:'-flipped',label:'黑衣刀客',counts:{idle:4,run:8,attack:4,hit:3,death:7},files:{idle:'idle-flipped.png',run:'run-flipped.png',attack:'attack-1-flipped.png',hit:'take-hit-flipped.png',death:'death-flipped.png'}};
+const images=new Map();let loaded=0,failed=0;
+function urlFor(def,state){return ROOT+def.dir+'/'+def.files[state]}
+function loadAll(){for(const def of Object.values(defs)){for(const state of Object.keys(def.files)){const url=urlFor(def,state);if(images.has(url))continue;const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{loaded++;};img.onerror=()=>{failed++;note.classList.add('error');note.insertAdjacentHTML('beforeend','<br>有素材加载失败，样板将显示占位人物。');};img.src=url;images.set(url,img)}}}
+loadAll();
+function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}function easeOut(t){return 1-Math.pow(1-t,3)}function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function drawBackdrop(shakeX=0,shakeY=0){ctx.save();ctx.translate(shakeX,shakeY);const g=ctx.createLinearGradient(0,0,0,562);g.addColorStop(0,'#27313b');g.addColorStop(.48,'#111820');g.addColorStop(1,'#090b0e');ctx.fillStyle=g;ctx.fillRect(-20,-20,1040,602);
+ const moon=ctx.createRadialGradient(760,92,4,760,92,80);moon.addColorStop(0,'rgba(241,243,238,.33)');moon.addColorStop(.35,'rgba(230,234,232,.12)');moon.addColorStop(1,'rgba(220,230,235,0)');ctx.fillStyle=moon;ctx.beginPath();ctx.arc(760,92,80,0,Math.PI*2);ctx.fill();ctx.fillStyle='#dce2df22';ctx.beginPath();ctx.arc(760,92,29,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#080b0ee8';ctx.beginPath();ctx.moveTo(-20,345);ctx.lineTo(110,190);ctx.lineTo(245,337);ctx.lineTo(395,160);ctx.lineTo(555,340);ctx.lineTo(690,218);ctx.lineTo(840,344);ctx.lineTo(1020,182);ctx.lineTo(1020,430);ctx.lineTo(-20,430);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#1b232bc4';ctx.beginPath();ctx.moveTo(-20,390);ctx.lineTo(155,275);ctx.lineTo(315,385);ctx.lineTo(505,250);ctx.lineTo(680,390);ctx.lineTo(860,292);ctx.lineTo(1020,370);ctx.lineTo(1020,455);ctx.lineTo(-20,455);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#14181d';ctx.fillRect(-20,430,1040,152);ctx.strokeStyle='#ffffff10';ctx.lineWidth=1;for(let y=448;y<575;y+=22){ctx.beginPath();ctx.moveTo(-20,y);ctx.lineTo(1020,y-15);ctx.stroke()}for(let x=50;x<1000;x+=110){ctx.beginPath();ctx.moveTo(x,430);ctx.lineTo(500+(x-500)*1.35,580);ctx.stroke()}
+ ctx.strokeStyle='#bec7d022';ctx.lineWidth=3;for(const x of [70,930]){ctx.beginPath();ctx.moveTo(x,230);ctx.lineTo(x,438);ctx.stroke();ctx.beginPath();ctx.moveTo(x-25,258);ctx.lineTo(x+25,258);ctx.stroke()}ctx.restore()}
+function drawBar(x,y,w,value,label,align='left'){ctx.save();ctx.fillStyle='#0009';rr(x-4,y-4,w+8,23,9);ctx.fill();ctx.fillStyle='#ffffff18';rr(x,y,w,13,6);ctx.fill();const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#e7edf2');g.addColorStop(1,'#9eabb8');ctx.fillStyle=g;rr(x,y,w*clamp(value),13,6);ctx.fill();ctx.fillStyle='#f2f4f6';ctx.font='600 15px system-ui';ctx.textAlign=align;ctx.fillText(label,align==='right'?x+w:x,y-10);ctx.restore()}
+function placeholder(x,y,side,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=side==='left'?'#385c73':'#6a424b';ctx.fillRect(x-22,y-100,44,95);ctx.fillStyle='#d5b394';ctx.beginPath();ctx.arc(x,y-120,15,0,Math.PI*2);ctx.fill();ctx.restore()}
+function drawSprite(side,state,progress,x,y,opts={}){const def=defs[side],url=urlFor(def,state),img=images.get(url),count=def.counts[state],alpha=opts.alpha??1;if(!img||!img.complete||!img.naturalWidth){placeholder(x,y,side,alpha);return}const frameW=img.naturalWidth/count,frameH=img.naturalHeight;let idx=Math.floor(clamp(progress,0,.999999)*count);if(state==='idle'||state==='run')idx=Math.floor((progress%1)*count);if(state==='death'&&progress>=1)idx=count-1;const scale=2.18,dw=frameW*scale,dh=frameH*scale;ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=alpha;if(opts.flash){ctx.shadowBlur=28;ctx.shadowColor='#fff'};ctx.drawImage(img,idx*frameW,0,frameW,frameH,x-dw*.5,y-dh*.69,dw,dh);ctx.restore()}
+function slashFx(x,y,dir,p){ctx.save();ctx.globalCompositeOperation='screen';ctx.lineCap='round';const a=clamp(1-Math.abs(p-.62)*2.2);ctx.globalAlpha=a;const grad=ctx.createLinearGradient(x-dir*110,y+60,x+dir*130,y-85);grad.addColorStop(0,'rgba(170,215,255,0)');grad.addColorStop(.45,'rgba(210,235,255,.75)');grad.addColorStop(.68,'rgba(255,255,255,1)');grad.addColorStop(1,'rgba(170,215,255,0)');ctx.strokeStyle=grad;ctx.lineWidth=8;ctx.shadowBlur=26;ctx.shadowColor='#b9dcff';ctx.beginPath();ctx.arc(x-dir*5,y-22,105,-1.05,1.05);ctx.stroke();ctx.globalAlpha=a*.35;ctx.lineWidth=24;ctx.stroke();ctx.restore()}
+function impactFx(x,y,p){ctx.save();ctx.translate(x,y);ctx.globalCompositeOperation='screen';const a=1-clamp(p);for(let i=0;i<14;i++){const ang=i/14*Math.PI*2,rad=22+p*70;ctx.strokeStyle=`rgba(235,245,255,${a*(.25+(i%3)*.13)})`;ctx.lineWidth=2+(i%2);ctx.beginPath();ctx.moveTo(Math.cos(ang)*18,Math.sin(ang)*18);ctx.lineTo(Math.cos(ang)*rad,Math.sin(ang)*rad);ctx.stroke()}ctx.strokeStyle=`rgba(255,255,255,${a*.7})`;ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,18+p*55,0,Math.PI*2);ctx.stroke();ctx.restore()}
+let start=performance.now(),paused=false,pauseAt=0;const duration=5200;
+function phase(t){let L={state:'idle',p:(t/900)%1,x:225},R={state:'idle',p:(t/800)%1,x:775},fx=null,impact=null,hpR:1,hpL:1,shake=0,title=''};
+ if(t<700){title='风起 · 对峙'}
+ else if(t<1500){const p=(t-700)/800;L={state:'run',p:p*1.7,x:225+easeOut(p)*285};title='踏风近身'}
+ else if(t<2200){const p=(t-1500)/700;L={state:'attack',p,x:510};fx={x:535,y:360,dir:1,p};title='青锋一式';if(p>.52){R={state:'hit',p:clamp((p-.52)/.48),x:775+easeOut(clamp((p-.52)/.48))*55};impact={x:737,y:340,p:clamp((p-.52)*2.1)};hpR=1-.38*easeOut(clamp((p-.52)*2.1));shake=(1-clamp(Math.abs(p-.58)*7))*7}}
+ else if(t<3000){const p=(t-2200)/800;L={state:'run',p:p*1.2,x:510-easeInOut(p)*285};R={state:'hit',p:1,x:830};hpR=.62;title='击退'}
+ else if(t<3700){const p=(t-3000)/700;L={state:'idle',p:p,x:225};R={state:'run',p:p*1.6,x:830-easeOut(p)*300};hpR=.62;title='反攻'}
+ else if(t<4400){const p=(t-3700)/700;R={state:'attack',p,x:530};L={state:p>.52?'hit':'idle',p:p>.52?clamp((p-.52)/.48):p,x:225-(p>.52?easeOut(clamp((p-.52)/.48))*45:0)};hpR=.62;hpL=1-(p>.52?.27*easeOut(clamp((p-.52)*2.1)):0);fx={x:505,y:360,dir:-1,p};if(p>.52)impact={x:266,y:342,p:clamp((p-.52)*2.1)};shake=(1-clamp(Math.abs(p-.58)*7))*6;title='回刀 · 破势'}
+ else{const p=(t-4400)/800;L={state:'idle',p:p,x:180};R={state:'idle',p:p,x:530+easeInOut(p)*245};hpR=.62;hpL=.73;title='再战'}return{L,R,fx,impact,hpR,hpL,shake,title}}
+function render(now){if(paused){requestAnimationFrame(render);return}const t=(now-start)%duration,s=phase(t),sx=s.shake?Math.sin(now*.095)*s.shake:0,sy=s.shake?Math.cos(now*.12)*s.shake*.45:0;ctx.clearRect(0,0,1000,562);drawBackdrop(sx,sy);ctx.save();ctx.translate(sx,sy);
+ // afterimages during fast approach
+ if((s.L.state==='run'&&s.L.x>300)){for(let i=1;i<=3;i++)drawSprite('left','run',(s.L.p-i*.08+1)%1,s.L.x-i*34,430,{alpha:.12/i})}if((s.R.state==='run'&&s.R.x<720)){for(let i=1;i<=3;i++)drawSprite('right','run',(s.R.p-i*.08+1)%1,s.R.x+i*34,430,{alpha:.12/i})}
+ drawSprite('left',s.L.state,s.L.p,s.L.x,430,{flash:s.L.state==='hit'});drawSprite('right',s.R.state,s.R.p,s.R.x,430,{flash:s.R.state==='hit'});if(s.fx)slashFx(s.fx.x,s.fx.y,s.fx.dir,s.fx.p);if(s.impact)impactFx(s.impact.x,s.impact.y,s.impact.p);ctx.restore();drawBar(34,34,320,s.hpL,defs.left.label);drawBar(646,34,320,s.hpR,defs.right.label,'right');ctx.save();ctx.textAlign='center';ctx.font='700 27px "Noto Serif CJK SC","Songti SC",serif';ctx.fillStyle='#f0f3f5';ctx.shadowBlur=15;ctx.shadowColor='#000';ctx.fillText(s.title,500,82);ctx.font='12px system-ui';ctx.fillStyle='#ffffff70';ctx.fillText('OPEN ASSET COMBAT PROTOTYPE',500,105);ctx.restore();requestAnimationFrame(render)}
+requestAnimationFrame(render);
+replayBtn.onclick=()=>{start=performance.now();if(paused){paused=false;pauseBtn.textContent='暂停'}};pauseBtn.onclick=()=>{if(!paused){paused=true;pauseAt=performance.now();pauseBtn.textContent='继续'}else{start+=performance.now()-pauseAt;paused=false;pauseBtn.textContent='暂停'}};
+</script></main></body></html>
