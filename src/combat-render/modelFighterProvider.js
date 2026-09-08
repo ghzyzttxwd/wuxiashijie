@@ -35,7 +35,7 @@ export class ModelFighterProvider{
       this.canvas=document.createElement('canvas');
       this.renderer=new THREE.WebGLRenderer({canvas:this.canvas,alpha:true,antialias:true,premultipliedAlpha:true});
       this.renderer.setPixelRatio(1);this.renderer.setSize(this.renderWidth,this.renderHeight,false);this.renderer.setClearColor(0x000000,0);
-      this.scene=new THREE.Scene();this.camera=new THREE.PerspectiveCamera(28,this.renderWidth/this.renderHeight,.01,100);this.camera.position.set(0,1.25,5.2);this.camera.lookAt(0,1.05,0);
+      this.scene=new THREE.Scene();this.camera=new THREE.PerspectiveCamera(28,this.renderWidth/this.renderHeight,.01,100);this.camera.position.set(0,1.15,5.15);this.camera.lookAt(0,.95,0);
       const hemi=new THREE.HemisphereLight(0xf3f0e8,0x25303a,2.35);this.scene.add(hemi);
       const key=new THREE.DirectionalLight(0xffffff,2.5);key.position.set(3,5,4);this.scene.add(key);
       const rim=new THREE.DirectionalLight(0x9fb9d7,1.2);rim.position.set(-4,3,-2);this.scene.add(rim);
@@ -44,16 +44,24 @@ export class ModelFighterProvider{
     }catch(error){console.warn('[ModelFighterProvider] preload failed',error);this.failed=true;return false;}
   }
 
+  #measureRoot(root,spec){
+    try{
+      root.updateMatrixWorld(true);const box=new this.THREE.Box3().setFromObject(root);const size=new this.THREE.Vector3(),center=new this.THREE.Vector3();box.getSize(size);box.getCenter(center);
+      const desiredHeight=spec.normalizedHeight||1.85,normScale=size.y>1e-5?desiredHeight/size.y:1;
+      return{normScale,centerX:center.x,groundY:box.min.y,centerZ:center.z};
+    }catch{return{normScale:1,centerX:0,groundY:0,centerZ:0};}
+  }
+
   async #loadRecord(key,spec){
     try{
-      const gltf=await this.loader.loadAsync(spec.url);const root=this.SkeletonUtils?.clone?this.SkeletonUtils.clone(gltf.scene):gltf.scene.clone(true);root.visible=false;this.scene.add(root);
-      const record={root,mixer:new this.THREE.AnimationMixer(root),clips:[...(gltf.animations||[])],externalClips:{},action:null,clipName:null,spec};this.records.set(key,record);
+      const gltf=await this.loader.loadAsync(spec.url);const root=this.SkeletonUtils?.clone?this.SkeletonUtils.clone(gltf.scene):gltf.scene.clone(true);const measure=this.#measureRoot(root,spec);root.visible=false;this.scene.add(root);
+      const record={root,mixer:new this.THREE.AnimationMixer(root),clips:[...(gltf.animations||[])],externalClips:{},action:null,clipName:null,spec,...measure};this.records.set(key,record);
       await this.#loadExternalMotions(record,spec);
     }catch(error){console.warn(`[ModelFighterProvider] asset failed: ${key}`,error);this.records.set(key,{error,spec});}
   }
 
   async #loadExternalMotions(record,spec){
-    const motionUrls=spec.motionUrls||{};const entries=Object.entries(motionUrls).filter(([,url])=>url);
+    const entries=Object.entries(spec.motionUrls||{}).filter(([,url])=>url);
     await Promise.all(entries.map(async([state,url])=>{
       try{
         const source=await this.#loadMotionSource(url);if(!source?.root||!source.clip)return;
@@ -65,29 +73,26 @@ export class ModelFighterProvider{
   }
 
   async #loadMotionSource(url){
-    const ext=extensionOf(url);
-    if(ext==='fbx'){
-      const root=await this.fbxLoader.loadAsync(url);const clip=root.animations?.[0]||null;return{root,clip};
-    }
-    const gltf=await this.loader.loadAsync(url);const clip=gltf.animations?.[0]||null;return{root:gltf.scene,clip};
+    if(extensionOf(url)==='fbx'){const root=await this.fbxLoader.loadAsync(url);return{root,clip:root.animations?.[0]||null};}
+    const gltf=await this.loader.loadAsync(url);return{root:gltf.scene,clip:gltf.animations?.[0]||null};
   }
 
   #recordFor(fighter,spec){const key=this.assets?.[fighter.id]===spec?fighter.id:(this.assets?.left===spec?'left':this.assets?.right===spec?'right':null);return key?this.records.get(key):null;}
   #clipForState(record,state){
     if(record.externalClips?.[state])return record.externalClips[state];
-    const custom=record.spec?.animations?.[state];
-    const requested=custom||DEFAULT_CLIP_HINTS[state]||DEFAULT_CLIP_HINTS.idle;
-    let clip=nameMatch(record.clips,requested);
-    if(!clip&&state!=='idle')clip=nameMatch(record.clips,record.spec?.animations?.idle||DEFAULT_CLIP_HINTS.idle);
+    const requested=record.spec?.animations?.[state]||DEFAULT_CLIP_HINTS[state]||DEFAULT_CLIP_HINTS.idle;
+    let clip=nameMatch(record.clips,requested);if(!clip&&state!=='idle')clip=nameMatch(record.clips,record.spec?.animations?.idle||DEFAULT_CLIP_HINTS.idle);
     return clip||nameMatch(record.clips,[],{fallback:true});
   }
   #applyAnimation(record,fighter){
-    if(!record?.mixer||!record.clips?.length)return;const state=fighter.visualState||'idle',clip=this.#clipForState(record,state);if(!clip)return;
+    if(!record?.mixer||!record.clips?.length)return;const clip=this.#clipForState(record,fighter.visualState||'idle');if(!clip)return;
     if(record.clipName!==clip.name){record.action?.stop();record.action=record.mixer.clipAction(clip);record.action.enabled=true;record.action.play();record.action.paused=true;record.clipName=clip.name;}
     record.action.time=clamp01(fighter.visualProgress)*Math.max(.001,clip.duration-.001);record.mixer.update(0);
   }
   #frameModel(record,fighter){
-    const root=record.root,spec=record.spec||{};root.visible=true;root.scale.setScalar(spec.scale??1);root.position.set(spec.offsetX||0,spec.offsetY||0,spec.offsetZ||0);
+    const root=record.root,spec=record.spec||{},auto=spec.autoNormalize!==false,norm=auto?(record.normScale||1):1,userScale=spec.scale??1,scale=norm*userScale;root.visible=true;root.scale.setScalar(scale);
+    const nx=auto?-(record.centerX||0)*scale:0,ny=auto?-(record.groundY||0)*scale:0,nz=auto?-(record.centerZ||0)*scale:0;
+    root.position.set(nx+(spec.offsetX||0),ny+(spec.offsetY||0),nz+(spec.offsetZ||0));
     const baseYaw=spec.baseYaw??0,facingYaw=spec.facingYaw??Math.PI/2;root.rotation.set(spec.pitch||0,baseYaw+(fighter.side===1?facingYaw:-facingYaw),spec.roll||0);
   }
   drawFighter(ctx,fighter,{alpha=1,ghost=false}={}){
@@ -100,6 +105,6 @@ export class ModelFighterProvider{
   }
 }
 
-export function createModelFighterAsset({url,scale=1,drawWidth=240,drawHeight=320,baseYaw=0,facingYaw=Math.PI/2,animations={},motionUrls={},retargetOptions={}}={}){
-  return{url,scale,drawWidth,drawHeight,baseYaw,facingYaw,animations,motionUrls,retargetOptions};
+export function createModelFighterAsset({url,scale=1,drawWidth=240,drawHeight=320,baseYaw=0,facingYaw=Math.PI/2,animations={},motionUrls={},retargetOptions={},autoNormalize=true,normalizedHeight=1.85}={}){
+  return{url,scale,drawWidth,drawHeight,baseYaw,facingYaw,animations,motionUrls,retargetOptions,autoNormalize,normalizedHeight};
 }
