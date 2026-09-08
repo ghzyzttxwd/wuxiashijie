@@ -84,7 +84,11 @@ function drawFighter(ctx,fighter,{alpha=1,ghost=false}={}){
   ctx.restore();
 }
 
-function drawAfterimages(ctx,afterimages=[]){for(const image of afterimages)drawFighter(ctx,image,{alpha:image.alpha??.18,ghost:true});}
+function drawFighterLayer(ctx,fighter,provider,options={}){
+  if(provider?.drawFighter){const handled=provider.drawFighter(ctx,fighter,options);if(handled!==false)return;}
+  drawFighter(ctx,fighter,options);
+}
+function drawAfterimages(ctx,afterimages=[],provider=null){for(const image of afterimages)drawFighterLayer(ctx,image,provider,{alpha:image.alpha??.18,ghost:true});}
 
 function drawGroundFeedback(ctx,{dust=[],impact=null}={}){
   ctx.save();
@@ -99,15 +103,16 @@ function drawDamagePopup(ctx,popup){
 }
 
 export class CombatRenderer{
-  constructor(canvas){if(!canvas)throw Error('canvas_required');this.canvas=canvas;this.ctx=canvas.getContext('2d');this.width=0;this.height=0;this.resize();}
+  constructor(canvas,{fighterVisualProvider=null}={}){if(!canvas)throw Error('canvas_required');this.canvas=canvas;this.ctx=canvas.getContext('2d');this.fighterVisualProvider=fighterVisualProvider;this.width=0;this.height=0;this.resize();}
+  setFighterVisualProvider(provider){this.fighterVisualProvider=provider||null;return this;}
   resize(){const rect=this.canvas.getBoundingClientRect(),dpr=Math.max(1,window.devicePixelRatio||1);this.width=Math.max(640,Math.round(rect.width||900));this.height=Math.max(360,Math.round(rect.height||500));this.canvas.width=Math.round(this.width*dpr);this.canvas.height=Math.round(this.height*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);}
   render(frame){
     const {camera,left,right,leftHp,rightHp,leftMaxHp,rightMaxHp,particles=[],martialId=null,attackerId=null,trailProgress=0,impact=null,damagePopup=null,title='',afterimages=[],dust=[]}=frame,ctx=this.ctx,w=this.width,h=this.height;
     ctx.clearRect(0,0,w,h);ctx.save();applyCamera(ctx,camera,w,h);drawBackdrop(ctx,w,h);
-    drawGroundFeedback(ctx,{dust,impact});drawAfterimages(ctx,afterimages);
+    drawGroundFeedback(ctx,{dust,impact});drawAfterimages(ctx,afterimages,this.fighterVisualProvider);
     const attacker=left.id===attackerId?left:right,target=left.id===attackerId?right:left;
     drawSkillTrail(ctx,{martialId,attacker,target,progress:trailProgress});
-    drawFighter(ctx,left);drawFighter(ctx,right);
+    drawFighterLayer(ctx,left,this.fighterVisualProvider);drawFighterLayer(ctx,right,this.fighterVisualProvider);
     if(impact)drawImpactFx(ctx,{martialId:impact.martialId,x:impact.x,y:impact.y,ageMs:impact.ageMs});
     drawParticles(ctx,particles);drawDamagePopup(ctx,damagePopup);ctx.restore();
     drawBar(ctx,{x:28,y:28,w:Math.min(310,w*.34),value:leftHp,max:leftMaxHp,label:left.name});
