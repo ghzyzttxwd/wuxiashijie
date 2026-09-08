@@ -24,6 +24,9 @@ jobs:
           browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$browser"
           echo "path=$browser" >> "$GITHUB_OUTPUT"
+      - name: Install browser automation client
+        shell: bash
+        run: npm install --no-save --ignore-scripts puppeteer-core@24
       - name: Cache trusted 3D fighters locally
         shell: bash
         run: |
@@ -71,16 +74,11 @@ jobs:
           test -s artifacts/combat.png
       - name: Verify and capture trusted third-party fighter candidate
         shell: bash
+        env:
+          BROWSER_PATH: ${{ steps.browser.outputs.path }}
         run: |
-          timeout 180s '${{ steps.browser.outputs.path }}' \
-            --headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader \
-            --hide-scrollbars --window-size=1440,900 --virtual-time-budget=60000 \
-            --dump-dom --screenshot=artifacts/combat-thirdparty.png \
-            'http://127.0.0.1:4173/tools/visual-combat.html?freeze=impact&art=metrixel&assetBase=/.visual-assets' \
-            > artifacts/combat-thirdparty-dom.html
+          timeout 180s node tools/capture-thirdparty.mjs
           test -s artifacts/combat-thirdparty.png
-          grep -o 'data-third-party-art="[^"]*"' artifacts/combat-thirdparty-dom.html || true
-          grep -o 'data-visual-ready="[^"]*"' artifacts/combat-thirdparty-dom.html || true
           grep -q 'data-third-party-art="ready"' artifacts/combat-thirdparty-dom.html
           grep -q 'data-visual-ready="impact"' artifacts/combat-thirdparty-dom.html
       - name: Upload visual diagnostics
