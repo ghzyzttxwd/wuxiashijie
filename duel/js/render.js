@@ -4,9 +4,9 @@ const TAU=Math.PI*2;
 export class Renderer{
  constructor(canvas,assets){this.ctx=canvas.getContext('2d');this.assets=assets;}
  draw(g,time){const c=this.ctx,{fx}=g;c.clearRect(0,0,W,H);c.save();if(fx.shake>0)c.translate((Math.random()-.5)*fx.shake,(Math.random()-.5)*fx.shake*.65);c.drawImage(this.assets.arena,0,0,W,H);const shade=c.createLinearGradient(0,450,0,H);shade.addColorStop(0,'#07131f00');shade.addColorStop(1,'#030b17cc');c.fillStyle=shade;c.fillRect(0,450,W,H);this.ambient(time);const action=g.action;if(action?.kind==='swords'){c.fillStyle=`rgba(5,18,42,${.28*clamp(action.t*2)})`;c.fillRect(0,0,W,H);this.aura(g.hero.x,430,action.t,'blue');}
- if(action?.kind==='dragon'&&action.t<1.5)this.aura(g.hero.x+60,425,action.t,'gold');
+ if(action?.kind==='dragon'&&action.t<.75)this.aura(g.hero.x+60,425,action.t,'gold');
  this.fighter(g.hero,time,true);this.fighter(g.enemy,time,false);
- if(action?.kind==='dragon')drawDragon(c,this.assets.dragon,action.t,g.enemy.x);
+ if(action?.kind==='dragon')drawDragon(c,this.assets.dragon,action.t,g.enemy.baseX);
  if(action?.kind==='swords')drawSwordField(c,action.field,action.t);
  if(action?.kind==='palm'&&action.t>.25&&action.t<.65){c.save();c.globalCompositeOperation='lighter';c.globalAlpha=Math.sin((action.t-.25)/.4*Math.PI);c.strokeStyle='#e3c690';c.lineWidth=5;c.beginPath();c.ellipse(g.hero.x+100,440,45,70,0,-1.4,1.4);c.stroke();c.restore();}
  fx.draw(c);c.restore();if(fx.flash>0){c.fillStyle=`rgba(255,232,179,${fx.flash*.36})`;c.fillRect(0,0,W,H);}if(g.combo>1&&action){c.save();c.textAlign='right';c.fillStyle='#cef2ff';c.font='italic 42px serif';c.fillText(g.combo+' 连击',1160,210);c.restore();}}
